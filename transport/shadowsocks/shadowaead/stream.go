@@ -7,7 +7,7 @@ import (
 	"io"
 	"net"
 
-	"github.com/Dreamacro/clash/common/pool"
+	"github.com/lijinglin3/clash/common/pool"
 )
 
 const (

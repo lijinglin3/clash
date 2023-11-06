@@ -5,7 +5,7 @@ sidebarOrder: 3
 
 # 功能: eBPF 重定向到 TUN
 
-eBPF 重定向到 TUN 是一项拦截特定网络接口上的所有网络流量, 并将其重定向到 TUN 接口的功能. 该功能需要[内核支持](https://github.com/iovisor/bcc/blob/master/INSTALL.md#kernel-configuration).
+eBPF 重定向到 TUN 是一项拦截特定网络接口上的所有网络流量, 并将其重定向到 TUN 接口的功能. 该功能需要[内核支持](https://github.com/iovisor/bcc/blob/main/INSTALL.md#kernel-configuration).
 
 ::: warning
 此功能与 `tun.auto-route` 冲突.

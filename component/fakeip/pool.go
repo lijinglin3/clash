@@ -6,9 +6,9 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/Dreamacro/clash/common/cache"
-	"github.com/Dreamacro/clash/component/profile/cachefile"
-	"github.com/Dreamacro/clash/component/trie"
+	"github.com/lijinglin3/clash/common/cache"
+	"github.com/lijinglin3/clash/component/profile/cachefile"
+	"github.com/lijinglin3/clash/component/trie"
 )
 
 type store interface {

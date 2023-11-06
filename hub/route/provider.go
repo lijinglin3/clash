@@ -4,9 +4,9 @@ import (
 	"context"
 	"net/http"
 
-	C "github.com/Dreamacro/clash/constant"
-	"github.com/Dreamacro/clash/constant/provider"
-	"github.com/Dreamacro/clash/tunnel"
+	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant/provider"
+	"github.com/lijinglin3/clash/tunnel"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"

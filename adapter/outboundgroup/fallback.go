@@ -4,11 +4,11 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/Dreamacro/clash/adapter/outbound"
-	"github.com/Dreamacro/clash/common/singledo"
-	"github.com/Dreamacro/clash/component/dialer"
-	C "github.com/Dreamacro/clash/constant"
-	"github.com/Dreamacro/clash/constant/provider"
+	"github.com/lijinglin3/clash/adapter/outbound"
+	"github.com/lijinglin3/clash/common/singledo"
+	"github.com/lijinglin3/clash/component/dialer"
+	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant/provider"
 )
 
 type Fallback struct {
