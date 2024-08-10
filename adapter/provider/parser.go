@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/lijinglin3/clash/common/structure"
-	C "github.com/lijinglin3/clash/constant"
-	types "github.com/lijinglin3/clash/constant/provider"
+	"github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant/provider"
 )
 
 var (
@@ -31,7 +31,7 @@ type proxyProviderSchema struct {
 	HealthCheck healthCheckSchema `provider:"health-check,omitempty"`
 }
 
-func ParseProxyProvider(name string, mapping map[string]any) (types.ProxyProvider, error) {
+func ParseProxyProvider(name string, mapping map[string]any) (provider.ProxyProvider, error) {
 	decoder := structure.NewDecoder(structure.Option{TagName: "provider", WeaklyTypedInput: true})
 
 	schema := &proxyProviderSchema{
@@ -47,16 +47,16 @@ func ParseProxyProvider(name string, mapping map[string]any) (types.ProxyProvide
 	if schema.HealthCheck.Enable {
 		hcInterval = uint(schema.HealthCheck.Interval)
 	}
-	hc := NewHealthCheck([]C.Proxy{}, schema.HealthCheck.URL, hcInterval, schema.HealthCheck.Lazy)
+	hc := NewHealthCheck([]constant.Proxy{}, schema.HealthCheck.URL, hcInterval, schema.HealthCheck.Lazy)
 
-	path := C.Path.Resolve(schema.Path)
+	path := constant.Path.Resolve(schema.Path)
 
-	var vehicle types.Vehicle
+	var vehicle provider.Vehicle
 	switch schema.Type {
 	case "file":
 		vehicle = NewFileVehicle(path)
 	case "http":
-		if !C.Path.IsSubPath(path) {
+		if !constant.Path.IsSubPath(path) {
 			return nil, fmt.Errorf("%w: %s", errSubPath, path)
 		}
 		vehicle = NewHTTPVehicle(schema.URL, path)

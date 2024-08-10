@@ -6,12 +6,12 @@ import (
 	"net/netip"
 	"time"
 
-	N "github.com/lijinglin3/clash/common/net"
+	cnet "github.com/lijinglin3/clash/common/net"
 	"github.com/lijinglin3/clash/common/pool"
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 )
 
-func handleUDPToRemote(packet C.UDPPacket, pc C.PacketConn, metadata *C.Metadata) error {
+func handleUDPToRemote(packet constant.UDPPacket, pc constant.PacketConn, metadata *constant.Metadata) error {
 	addr := metadata.UDPAddr()
 	if addr == nil {
 		return errors.New("udp addr invalid")
@@ -26,7 +26,7 @@ func handleUDPToRemote(packet C.UDPPacket, pc C.PacketConn, metadata *C.Metadata
 	return nil
 }
 
-func handleUDPToLocal(packet C.UDPPacket, pc net.PacketConn, key string, oAddr, fAddr netip.Addr) {
+func handleUDPToLocal(packet constant.UDPPacket, pc net.PacketConn, key string, oAddr, fAddr netip.Addr) {
 	buf := pool.Get(pool.UDPBufferSize)
 	defer pool.Put(buf)
 	defer natTable.Delete(key)
@@ -55,6 +55,6 @@ func handleUDPToLocal(packet C.UDPPacket, pc net.PacketConn, key string, oAddr, 
 	}
 }
 
-func handleSocket(ctx C.ConnContext, outbound net.Conn) {
-	N.Relay(ctx.Conn(), outbound)
+func handleSocket(ctx constant.ConnContext, outbound net.Conn) {
+	cnet.Relay(ctx.Conn(), outbound)
 }

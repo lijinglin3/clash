@@ -8,7 +8,7 @@ import (
 	"github.com/lijinglin3/clash/adapter/outbound"
 	"github.com/lijinglin3/clash/common/singledo"
 	"github.com/lijinglin3/clash/component/dialer"
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 	"github.com/lijinglin3/clash/constant/provider"
 )
 
@@ -24,7 +24,7 @@ type URLTest struct {
 	*outbound.Base
 	tolerance  uint16
 	disableUDP bool
-	fastNode   C.Proxy
+	fastNode   constant.Proxy
 	single     *singledo.Single
 	fastSingle *singledo.Single
 	providers  []provider.ProxyProvider
@@ -34,8 +34,8 @@ func (u *URLTest) Now() string {
 	return u.fast(false).Name()
 }
 
-// DialContext implements C.ProxyAdapter
-func (u *URLTest) DialContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (c C.Conn, err error) {
+// DialContext implements constant.ProxyAdapter
+func (u *URLTest) DialContext(ctx context.Context, metadata *constant.Metadata, opts ...dialer.Option) (c constant.Conn, err error) {
 	c, err = u.fast(true).DialContext(ctx, metadata, u.Base.DialOptions(opts...)...)
 	if err == nil {
 		c.AppendToChains(u)
@@ -43,8 +43,8 @@ func (u *URLTest) DialContext(ctx context.Context, metadata *C.Metadata, opts ..
 	return c, err
 }
 
-// ListenPacketContext implements C.ProxyAdapter
-func (u *URLTest) ListenPacketContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (C.PacketConn, error) {
+// ListenPacketContext implements constant.ProxyAdapter
+func (u *URLTest) ListenPacketContext(ctx context.Context, metadata *constant.Metadata, opts ...dialer.Option) (constant.PacketConn, error) {
 	pc, err := u.fast(true).ListenPacketContext(ctx, metadata, u.Base.DialOptions(opts...)...)
 	if err == nil {
 		pc.AppendToChains(u)
@@ -52,21 +52,21 @@ func (u *URLTest) ListenPacketContext(ctx context.Context, metadata *C.Metadata,
 	return pc, err
 }
 
-// Unwrap implements C.ProxyAdapter
-func (u *URLTest) Unwrap(metadata *C.Metadata) C.Proxy {
+// Unwrap implements constant.ProxyAdapter
+func (u *URLTest) Unwrap(metadata *constant.Metadata) constant.Proxy {
 	return u.fast(true)
 }
 
-func (u *URLTest) proxies(touch bool) []C.Proxy {
-	elm, _, _ := u.single.Do(func() (any, error) {
+func (u *URLTest) proxies(touch bool) []constant.Proxy {
+	_, elm, _ := u.single.Do(func() (any, error) {
 		return getProvidersProxies(u.providers, touch), nil
 	})
 
-	return elm.([]C.Proxy)
+	return elm.([]constant.Proxy)
 }
 
-func (u *URLTest) fast(touch bool) C.Proxy {
-	elm, _, shared := u.fastSingle.Do(func() (any, error) {
+func (u *URLTest) fast(touch bool) constant.Proxy {
+	shared, elm, _ := u.fastSingle.Do(func() (any, error) {
 		proxies := u.proxies(touch)
 		fast := proxies[0]
 		min := fast.LastDelay()
@@ -99,10 +99,10 @@ func (u *URLTest) fast(touch bool) C.Proxy {
 		touchProviders(u.providers)
 	}
 
-	return elm.(C.Proxy)
+	return elm.(constant.Proxy)
 }
 
-// SupportUDP implements C.ProxyAdapter
+// SupportUDP implements constant.ProxyAdapter
 func (u *URLTest) SupportUDP() bool {
 	if u.disableUDP {
 		return false
@@ -111,7 +111,7 @@ func (u *URLTest) SupportUDP() bool {
 	return u.fast(false).SupportUDP()
 }
 
-// MarshalJSON implements C.ProxyAdapter
+// MarshalJSON implements constant.ProxyAdapter
 func (u *URLTest) MarshalJSON() ([]byte, error) {
 	var all []string
 	for _, proxy := range u.proxies(false) {
@@ -139,7 +139,7 @@ func NewURLTest(option *GroupCommonOption, providers []provider.ProxyProvider, o
 	urlTest := &URLTest{
 		Base: outbound.NewBase(outbound.BaseOption{
 			Name:        option.Name,
-			Type:        C.URLTest,
+			Type:        constant.URLTest,
 			Interface:   option.Interface,
 			RoutingMark: option.RoutingMark,
 		}),

@@ -1,14 +1,14 @@
-package rules
+package rule
 
 import (
 	"strings"
 
 	"github.com/lijinglin3/clash/component/mmdb"
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 )
 
-// Implements C.Rule
-var _ C.Rule = (*GEOIP)(nil)
+// Implements constant.Rule
+var _ constant.Rule = (*GEOIP)(nil)
 
 type GEOIP struct {
 	country     string
@@ -16,11 +16,11 @@ type GEOIP struct {
 	noResolveIP bool
 }
 
-func (g *GEOIP) RuleType() C.RuleType {
-	return C.GEOIP
+func (g *GEOIP) RuleType() constant.RuleType {
+	return constant.GEOIP
 }
 
-func (g *GEOIP) Match(metadata *C.Metadata) bool {
+func (g *GEOIP) Match(metadata *constant.Metadata) bool {
 	ip := metadata.DstIP
 	if ip == nil {
 		return false
@@ -49,7 +49,7 @@ func (g *GEOIP) ShouldFindProcess() bool {
 	return false
 }
 
-func NewGEOIP(country string, adapter string, noResolveIP bool) *GEOIP {
+func NewGEOIP(country, adapter string, noResolveIP bool) *GEOIP {
 	geoip := &GEOIP{
 		country:     country,
 		adapter:     adapter,

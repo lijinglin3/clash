@@ -5,15 +5,15 @@ import (
 	"testing"
 	"time"
 
+	"github.com/lijinglin3/clash/adapter/outbound"
+	"github.com/lijinglin3/clash/constant"
+
 	"github.com/docker/docker/api/types/container"
 	"github.com/stretchr/testify/require"
-
-	"github.com/lijinglin3/clash/adapter/outbound"
-	C "github.com/lijinglin3/clash/constant"
 )
 
 func TestClash_Vmess(t *testing.T) {
-	configPath := C.Path.Resolve("vmess.json")
+	configPath := constant.Path.Resolve("vmess.json")
 
 	cfg := &container.Config{
 		Image:        ImageVmess,
@@ -57,9 +57,9 @@ func TestClash_VmessTLS(t *testing.T) {
 	hostCfg := &container.HostConfig{
 		PortBindings: defaultPortBindings,
 		Binds: []string{
-			fmt.Sprintf("%s:/etc/v2ray/config.json", C.Path.Resolve("vmess-tls.json")),
-			fmt.Sprintf("%s:/etc/ssl/v2ray/fullchain.pem", C.Path.Resolve("example.org.pem")),
-			fmt.Sprintf("%s:/etc/ssl/v2ray/privkey.pem", C.Path.Resolve("example.org-key.pem")),
+			fmt.Sprintf("%s:/etc/v2ray/config.json", constant.Path.Resolve("vmess-tls.json")),
+			fmt.Sprintf("%s:/etc/ssl/v2ray/fullchain.pem", constant.Path.Resolve("example.org.pem")),
+			fmt.Sprintf("%s:/etc/ssl/v2ray/privkey.pem", constant.Path.Resolve("example.org-key.pem")),
 		},
 	}
 
@@ -96,9 +96,9 @@ func TestClash_VmessHTTP2(t *testing.T) {
 	hostCfg := &container.HostConfig{
 		PortBindings: defaultPortBindings,
 		Binds: []string{
-			fmt.Sprintf("%s:/etc/v2ray/config.json", C.Path.Resolve("vmess-http2.json")),
-			fmt.Sprintf("%s:/etc/ssl/v2ray/fullchain.pem", C.Path.Resolve("example.org.pem")),
-			fmt.Sprintf("%s:/etc/ssl/v2ray/privkey.pem", C.Path.Resolve("example.org-key.pem")),
+			fmt.Sprintf("%s:/etc/v2ray/config.json", constant.Path.Resolve("vmess-http2.json")),
+			fmt.Sprintf("%s:/etc/ssl/v2ray/fullchain.pem", constant.Path.Resolve("example.org.pem")),
+			fmt.Sprintf("%s:/etc/ssl/v2ray/privkey.pem", constant.Path.Resolve("example.org-key.pem")),
 		},
 	}
 
@@ -140,7 +140,7 @@ func TestClash_VmessHTTP(t *testing.T) {
 	hostCfg := &container.HostConfig{
 		PortBindings: defaultPortBindings,
 		Binds: []string{
-			fmt.Sprintf("%s:/etc/v2ray/config.json", C.Path.Resolve("vmess-http.json")),
+			fmt.Sprintf("%s:/etc/v2ray/config.json", constant.Path.Resolve("vmess-http.json")),
 		},
 	}
 
@@ -192,7 +192,7 @@ func TestClash_VmessWebsocket(t *testing.T) {
 	hostCfg := &container.HostConfig{
 		PortBindings: defaultPortBindings,
 		Binds: []string{
-			fmt.Sprintf("%s:/etc/v2ray/config.json", C.Path.Resolve("vmess-ws.json")),
+			fmt.Sprintf("%s:/etc/v2ray/config.json", constant.Path.Resolve("vmess-ws.json")),
 		},
 	}
 
@@ -227,9 +227,9 @@ func TestClash_VmessWebsocketTLS(t *testing.T) {
 	hostCfg := &container.HostConfig{
 		PortBindings: defaultPortBindings,
 		Binds: []string{
-			fmt.Sprintf("%s:/etc/v2ray/config.json", C.Path.Resolve("vmess-ws-tls.json")),
-			fmt.Sprintf("%s:/etc/ssl/v2ray/fullchain.pem", C.Path.Resolve("example.org.pem")),
-			fmt.Sprintf("%s:/etc/ssl/v2ray/privkey.pem", C.Path.Resolve("example.org-key.pem")),
+			fmt.Sprintf("%s:/etc/v2ray/config.json", constant.Path.Resolve("vmess-ws-tls.json")),
+			fmt.Sprintf("%s:/etc/ssl/v2ray/fullchain.pem", constant.Path.Resolve("example.org.pem")),
+			fmt.Sprintf("%s:/etc/ssl/v2ray/privkey.pem", constant.Path.Resolve("example.org-key.pem")),
 		},
 	}
 
@@ -266,9 +266,9 @@ func TestClash_VmessWebsocketTLSZero(t *testing.T) {
 	hostCfg := &container.HostConfig{
 		PortBindings: defaultPortBindings,
 		Binds: []string{
-			fmt.Sprintf("%s:/etc/v2ray/config.json", C.Path.Resolve("vmess-ws-tls-zero.json")),
-			fmt.Sprintf("%s:/etc/ssl/v2ray/fullchain.pem", C.Path.Resolve("example.org.pem")),
-			fmt.Sprintf("%s:/etc/ssl/v2ray/privkey.pem", C.Path.Resolve("example.org-key.pem")),
+			fmt.Sprintf("%s:/etc/v2ray/config.json", constant.Path.Resolve("vmess-ws-tls-zero.json")),
+			fmt.Sprintf("%s:/etc/ssl/v2ray/fullchain.pem", constant.Path.Resolve("example.org.pem")),
+			fmt.Sprintf("%s:/etc/ssl/v2ray/privkey.pem", constant.Path.Resolve("example.org-key.pem")),
 		},
 	}
 
@@ -305,9 +305,9 @@ func TestClash_VmessGrpc(t *testing.T) {
 	hostCfg := &container.HostConfig{
 		PortBindings: defaultPortBindings,
 		Binds: []string{
-			fmt.Sprintf("%s:/etc/v2ray/config.json", C.Path.Resolve("vmess-grpc.json")),
-			fmt.Sprintf("%s:/etc/ssl/v2ray/fullchain.pem", C.Path.Resolve("example.org.pem")),
-			fmt.Sprintf("%s:/etc/ssl/v2ray/privkey.pem", C.Path.Resolve("example.org-key.pem")),
+			fmt.Sprintf("%s:/etc/v2ray/config.json", constant.Path.Resolve("vmess-grpc.json")),
+			fmt.Sprintf("%s:/etc/ssl/v2ray/fullchain.pem", constant.Path.Resolve("example.org.pem")),
+			fmt.Sprintf("%s:/etc/ssl/v2ray/privkey.pem", constant.Path.Resolve("example.org-key.pem")),
 		},
 	}
 
@@ -348,7 +348,7 @@ func TestClash_VmessWebsocket0RTT(t *testing.T) {
 	hostCfg := &container.HostConfig{
 		PortBindings: defaultPortBindings,
 		Binds: []string{
-			fmt.Sprintf("%s:/etc/v2ray/config.json", C.Path.Resolve("vmess-ws-0rtt.json")),
+			fmt.Sprintf("%s:/etc/v2ray/config.json", constant.Path.Resolve("vmess-ws-0rtt.json")),
 		},
 	}
 
@@ -386,7 +386,7 @@ func TestClash_VmessWebsocketXray0RTT(t *testing.T) {
 	hostCfg := &container.HostConfig{
 		PortBindings: defaultPortBindings,
 		Binds: []string{
-			fmt.Sprintf("%s:/etc/xray/config.json", C.Path.Resolve("vmess-ws-0rtt.json")),
+			fmt.Sprintf("%s:/etc/xray/config.json", constant.Path.Resolve("vmess-ws-0rtt.json")),
 		},
 	}
 
@@ -416,7 +416,7 @@ func TestClash_VmessWebsocketXray0RTT(t *testing.T) {
 }
 
 func Benchmark_Vmess(b *testing.B) {
-	configPath := C.Path.Resolve("vmess.json")
+	configPath := constant.Path.Resolve("vmess.json")
 
 	cfg := &container.Config{
 		Image:        ImageVmess,

@@ -8,7 +8,7 @@ import (
 	"github.com/lijinglin3/clash/component/iface"
 )
 
-func lookupLocalAddr(ifaceName string, network string, destination net.IP, port int) (net.Addr, error) {
+func lookupLocalAddr(ifaceName, network string, destination net.IP, port int) (net.Addr, error) {
 	ifaceObj, err := iface.ResolveInterface(ifaceName)
 	if err != nil {
 		return nil, err

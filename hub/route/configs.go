@@ -6,7 +6,7 @@ import (
 
 	"github.com/lijinglin3/clash/component/resolver"
 	"github.com/lijinglin3/clash/config"
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 	"github.com/lijinglin3/clash/hub/executor"
 	"github.com/lijinglin3/clash/listener"
 	"github.com/lijinglin3/clash/log"
@@ -32,16 +32,16 @@ func getConfigs(w http.ResponseWriter, r *http.Request) {
 
 func patchConfigs(w http.ResponseWriter, r *http.Request) {
 	general := struct {
-		Port        *int               `json:"port"`
-		SocksPort   *int               `json:"socks-port"`
-		RedirPort   *int               `json:"redir-port"`
-		TProxyPort  *int               `json:"tproxy-port"`
-		MixedPort   *int               `json:"mixed-port"`
-		AllowLan    *bool              `json:"allow-lan"`
-		BindAddress *string            `json:"bind-address"`
-		Mode        *tunnel.TunnelMode `json:"mode"`
-		LogLevel    *log.LogLevel      `json:"log-level"`
-		IPv6        *bool              `json:"ipv6"`
+		Port        *int         `json:"port"`
+		SocksPort   *int         `json:"socks-port"`
+		RedirPort   *int         `json:"redir-port"`
+		TProxyPort  *int         `json:"tproxy-port"`
+		MixedPort   *int         `json:"mixed-port"`
+		AllowLan    *bool        `json:"allow-lan"`
+		BindAddress *string      `json:"bind-address"`
+		Mode        *tunnel.Mode `json:"mode"`
+		LogLevel    *log.Level   `json:"log-level"`
+		IPv6        *bool        `json:"ipv6"`
 	}{}
 	if err := render.DecodeJSON(r.Body, &general); err != nil {
 		render.Status(r, http.StatusBadRequest)
@@ -105,7 +105,7 @@ func updateConfigs(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		if req.Path == "" {
-			req.Path = C.Path.Config()
+			req.Path = constant.Path.Config()
 		}
 		if !filepath.IsAbs(req.Path) {
 			render.Status(r, http.StatusBadRequest)

@@ -11,22 +11,22 @@ import (
 	"github.com/lijinglin3/clash/component/dialer"
 	"github.com/lijinglin3/clash/component/resolver"
 
-	D "github.com/miekg/dns"
+	"github.com/miekg/dns"
 )
 
 type client struct {
-	*D.Client
+	*dns.Client
 	r     *Resolver
 	port  string
 	host  string
 	iface string
 }
 
-func (c *client) Exchange(m *D.Msg) (*D.Msg, error) {
+func (c *client) Exchange(m *dns.Msg) (*dns.Msg, error) {
 	return c.ExchangeContext(context.Background(), m)
 }
 
-func (c *client) ExchangeContext(ctx context.Context, m *D.Msg) (*D.Msg, error) {
+func (c *client) ExchangeContext(ctx context.Context, m *dns.Msg) (*dns.Msg, error) {
 	var (
 		ip  net.IP
 		err error
@@ -64,7 +64,7 @@ func (c *client) ExchangeContext(ctx context.Context, m *D.Msg) (*D.Msg, error) 
 	// miekg/dns ExchangeContext doesn't respond to context cancel.
 	// this is a workaround
 	type result struct {
-		msg *D.Msg
+		msg *dns.Msg
 		err error
 	}
 	ch := make(chan result, 1)
@@ -73,7 +73,7 @@ func (c *client) ExchangeContext(ctx context.Context, m *D.Msg) (*D.Msg, error) 
 			conn = tls.Client(conn, c.Client.TLSConfig)
 		}
 
-		msg, _, err := c.Client.ExchangeWithConn(m, &D.Conn{
+		msg, _, err := c.Client.ExchangeWithConn(m, &dns.Conn{
 			Conn:         conn,
 			UDPSize:      c.Client.UDPSize,
 			TsigSecret:   c.Client.TsigSecret,

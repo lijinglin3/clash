@@ -12,7 +12,7 @@ import (
 	"net/http"
 	"sync"
 
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 	"github.com/lijinglin3/clash/transport/socks5"
 	"github.com/lijinglin3/clash/transport/vmess"
 
@@ -73,7 +73,7 @@ func (t *Trojan) StreamConn(conn net.Conn) (net.Conn, error) {
 	tlsConn := tls.Client(conn, tlsConfig)
 
 	// fix tls handshake not timeout
-	ctx, cancel := context.WithTimeout(context.Background(), C.DefaultTLSTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), constant.DefaultTLSTimeout)
 	defer cancel()
 	if err := tlsConn.HandshakeContext(ctx); err != nil {
 		return nil, err

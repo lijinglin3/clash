@@ -11,7 +11,7 @@ import (
 	"strconv"
 
 	"github.com/lijinglin3/clash/component/dialer"
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 	"github.com/lijinglin3/clash/transport/socks5"
 )
 
@@ -36,11 +36,11 @@ type Socks5Option struct {
 	SkipCertVerify bool   `proxy:"skip-cert-verify,omitempty"`
 }
 
-// StreamConn implements C.ProxyAdapter
-func (ss *Socks5) StreamConn(c net.Conn, metadata *C.Metadata) (net.Conn, error) {
+// StreamConn implements constant.ProxyAdapter
+func (ss *Socks5) StreamConn(c net.Conn, metadata *constant.Metadata) (net.Conn, error) {
 	if ss.tls {
 		cc := tls.Client(c, ss.tlsConfig)
-		ctx, cancel := context.WithTimeout(context.Background(), C.DefaultTLSTimeout)
+		ctx, cancel := context.WithTimeout(context.Background(), constant.DefaultTLSTimeout)
 		defer cancel()
 		err := cc.HandshakeContext(ctx)
 		c = cc
@@ -62,8 +62,8 @@ func (ss *Socks5) StreamConn(c net.Conn, metadata *C.Metadata) (net.Conn, error)
 	return c, nil
 }
 
-// DialContext implements C.ProxyAdapter
-func (ss *Socks5) DialContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (_ C.Conn, err error) {
+// DialContext implements constant.ProxyAdapter
+func (ss *Socks5) DialContext(ctx context.Context, metadata *constant.Metadata, opts ...dialer.Option) (_ constant.Conn, err error) {
 	c, err := dialer.DialContext(ctx, "tcp", ss.addr, ss.Base.DialOptions(opts...)...)
 	if err != nil {
 		return nil, fmt.Errorf("%s connect error: %w", ss.addr, err)
@@ -82,8 +82,8 @@ func (ss *Socks5) DialContext(ctx context.Context, metadata *C.Metadata, opts ..
 	return NewConn(c, ss), nil
 }
 
-// ListenPacketContext implements C.ProxyAdapter
-func (ss *Socks5) ListenPacketContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (_ C.PacketConn, err error) {
+// ListenPacketContext implements constant.ProxyAdapter
+func (ss *Socks5) ListenPacketContext(ctx context.Context, metadata *constant.Metadata, opts ...dialer.Option) (_ constant.PacketConn, err error) {
 	c, err := dialer.DialContext(ctx, "tcp", ss.addr, ss.Base.DialOptions(opts...)...)
 	if err != nil {
 		err = fmt.Errorf("%s connect error: %w", ss.addr, err)
@@ -92,7 +92,7 @@ func (ss *Socks5) ListenPacketContext(ctx context.Context, metadata *C.Metadata,
 
 	if ss.tls {
 		cc := tls.Client(c, ss.tlsConfig)
-		ctx, cancel := context.WithTimeout(context.Background(), C.DefaultTLSTimeout)
+		ctx, cancel := context.WithTimeout(context.Background(), constant.DefaultTLSTimeout)
 		defer cancel()
 		err = cc.HandshakeContext(ctx)
 		c = cc
@@ -161,7 +161,7 @@ func NewSocks5(option Socks5Option) *Socks5 {
 		Base: &Base{
 			name:  option.Name,
 			addr:  net.JoinHostPort(option.Server, strconv.Itoa(option.Port)),
-			tp:    C.Socks5,
+			tp:    constant.Socks5,
 			udp:   option.UDP,
 			iface: option.Interface,
 			rmark: option.RoutingMark,

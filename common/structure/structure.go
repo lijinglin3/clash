@@ -201,7 +201,7 @@ func (d *Decoder) decodeMap(name string, data any, val reflect.Value) error {
 	return d.decodeMapFromMap(name, dataVal, val, valMap)
 }
 
-func (d *Decoder) decodeMapFromMap(name string, dataVal reflect.Value, val reflect.Value, valMap reflect.Value) error {
+func (d *Decoder) decodeMapFromMap(name string, dataVal, val, valMap reflect.Value) error {
 	valType := val.Type()
 	valKeyType := valType.Key()
 	valElemType := valType.Elem()

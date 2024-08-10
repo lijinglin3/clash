@@ -11,9 +11,9 @@ import (
 
 	"github.com/lijinglin3/clash/adapter/inbound"
 	"github.com/lijinglin3/clash/component/nat"
-	P "github.com/lijinglin3/clash/component/process"
+	"github.com/lijinglin3/clash/component/process"
 	"github.com/lijinglin3/clash/component/resolver"
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 	"github.com/lijinglin3/clash/constant/provider"
 	icontext "github.com/lijinglin3/clash/context"
 	"github.com/lijinglin3/clash/log"
@@ -23,11 +23,11 @@ import (
 )
 
 var (
-	tcpQueue  = make(chan C.ConnContext, 200)
+	tcpQueue  = make(chan constant.ConnContext, 200)
 	udpQueue  = make(chan *inbound.PacketAdapter, 200)
 	natTable  = nat.New()
-	rules     []C.Rule
-	proxies   = make(map[string]C.Proxy)
+	rules     []constant.Rule
+	proxies   = make(map[string]constant.Proxy)
 	providers map[string]provider.ProxyProvider
 	configMux sync.RWMutex
 
@@ -42,11 +42,11 @@ var (
 )
 
 func init() {
-	go process()
+	go processTCP()
 }
 
 // TCPIn return fan-in queue
-func TCPIn() chan<- C.ConnContext {
+func TCPIn() chan<- constant.ConnContext {
 	return tcpQueue
 }
 
@@ -56,19 +56,19 @@ func UDPIn() chan<- *inbound.PacketAdapter {
 }
 
 // Rules return all rules
-func Rules() []C.Rule {
+func Rules() []constant.Rule {
 	return rules
 }
 
 // UpdateRules handle update rules
-func UpdateRules(newRules []C.Rule) {
+func UpdateRules(newRules []constant.Rule) {
 	configMux.Lock()
 	rules = newRules
 	configMux.Unlock()
 }
 
 // Proxies return all proxies
-func Proxies() map[string]C.Proxy {
+func Proxies() map[string]constant.Proxy {
 	return proxies
 }
 
@@ -78,20 +78,20 @@ func Providers() map[string]provider.ProxyProvider {
 }
 
 // UpdateProxies handle update proxies
-func UpdateProxies(newProxies map[string]C.Proxy, newProviders map[string]provider.ProxyProvider) {
+func UpdateProxies(newProxies map[string]constant.Proxy, newProviders map[string]provider.ProxyProvider) {
 	configMux.Lock()
 	proxies = newProxies
 	providers = newProviders
 	configMux.Unlock()
 }
 
-// Mode return current mode
-func Mode() TunnelMode {
+// GetMode return current mode
+func GetMode() Mode {
 	return mode
 }
 
 // SetMode change the mode of tunnel
-func SetMode(m TunnelMode) {
+func SetMode(m Mode) {
 	mode = m
 }
 
@@ -103,7 +103,7 @@ func processUDP() {
 	}
 }
 
-func process() {
+func processTCP() {
 	numUDPWorkers := 4
 	if num := runtime.GOMAXPROCS(0); num > numUDPWorkers {
 		numUDPWorkers = num
@@ -118,11 +118,11 @@ func process() {
 	}
 }
 
-func needLookupIP(metadata *C.Metadata) bool {
+func needLookupIP(metadata *constant.Metadata) bool {
 	return resolver.MappingEnabled() && metadata.Host == "" && metadata.DstIP != nil
 }
 
-func preHandleMetadata(metadata *C.Metadata) error {
+func preHandleMetadata(metadata *constant.Metadata) error {
 	// handle IP string on host
 	if ip := net.ParseIP(metadata.Host); ip != nil {
 		metadata.DstIP = ip
@@ -134,10 +134,10 @@ func preHandleMetadata(metadata *C.Metadata) error {
 		host, exist := resolver.FindHostByIP(metadata.DstIP)
 		if exist {
 			metadata.Host = host
-			metadata.DNSMode = C.DNSMapping
+			metadata.DNSMode = constant.DNSMapping
 			if resolver.FakeIPEnabled() {
 				metadata.DstIP = nil
-				metadata.DNSMode = C.DNSFakeIP
+				metadata.DNSMode = constant.DNSFakeIP
 			} else if node := resolver.DefaultHosts.Search(host); node != nil {
 				// redir-host should lookup the hosts
 				metadata.DstIP = node.Data.(net.IP)
@@ -150,7 +150,7 @@ func preHandleMetadata(metadata *C.Metadata) error {
 	return nil
 }
 
-func resolveMetadata(ctx C.PlainContext, metadata *C.Metadata) (proxy C.Proxy, rule C.Rule, err error) {
+func resolveMetadata(ctx constant.PlainContext, metadata *constant.Metadata) (proxy constant.Proxy, rule constant.Rule, err error) {
 	if metadata.SpecialProxy != "" {
 		var exist bool
 		proxy, exist = proxies[metadata.SpecialProxy]
@@ -250,7 +250,7 @@ func handleUDPConn(packet *inbound.PacketAdapter) {
 			return
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), C.DefaultUDPTimeout)
+		ctx, cancel := context.WithTimeout(context.Background(), constant.DefaultUDPTimeout)
 		defer cancel()
 		rawPc, err := proxy.ListenPacketContext(ctx, metadata.Pure())
 		if err != nil {
@@ -303,7 +303,7 @@ func handleUDPConn(packet *inbound.PacketAdapter) {
 	}()
 }
 
-func handleTCPConn(connCtx C.ConnContext) {
+func handleTCPConn(connCtx constant.ConnContext) {
 	defer connCtx.Conn().Close()
 
 	metadata := connCtx.Metadata()
@@ -323,7 +323,7 @@ func handleTCPConn(connCtx C.ConnContext) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), C.DefaultTCPTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), constant.DefaultTCPTimeout)
 	defer cancel()
 	remoteConn, err := proxy.DialContext(ctx, metadata.Pure())
 	if err != nil {
@@ -370,11 +370,11 @@ func handleTCPConn(connCtx C.ConnContext) {
 	handleSocket(connCtx, remoteConn)
 }
 
-func shouldResolveIP(rule C.Rule, metadata *C.Metadata) bool {
+func shouldResolveIP(rule constant.Rule, metadata *constant.Metadata) bool {
 	return rule.ShouldResolveIP() && metadata.Host != "" && metadata.DstIP == nil
 }
 
-func match(metadata *C.Metadata) (C.Proxy, C.Rule, error) {
+func match(metadata *constant.Metadata) (constant.Proxy, constant.Rule, error) {
 	configMux.RLock()
 	defer configMux.RUnlock()
 
@@ -405,7 +405,7 @@ func match(metadata *C.Metadata) (C.Proxy, C.Rule, error) {
 			srcIP, ok := netip.AddrFromSlice(metadata.SrcIP)
 			if ok && metadata.OriginDst.IsValid() {
 				srcIP = srcIP.Unmap()
-				path, err := P.FindProcessPath(metadata.NetWork.String(), netip.AddrPortFrom(srcIP, uint16(metadata.SrcPort)), metadata.OriginDst)
+				path, err := process.FindProcessPath(metadata.NetWork.String(), netip.AddrPortFrom(srcIP, uint16(metadata.SrcPort)), metadata.OriginDst)
 				if err != nil {
 					log.Debugln("[Process] find process %s: %v", metadata.String(), err)
 				} else {
@@ -421,7 +421,7 @@ func match(metadata *C.Metadata) (C.Proxy, C.Rule, error) {
 				continue
 			}
 
-			if metadata.NetWork == C.UDP && !adapter.SupportUDP() && UDPFallbackMatch.Load() {
+			if metadata.NetWork == constant.UDP && !adapter.SupportUDP() && UDPFallbackMatch.Load() {
 				log.Debugln("[Matcher] %s UDP is not supported, skip match", adapter.Name())
 				continue
 			}

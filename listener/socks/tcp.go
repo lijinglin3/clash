@@ -5,9 +5,9 @@ import (
 	"net"
 
 	"github.com/lijinglin3/clash/adapter/inbound"
-	N "github.com/lijinglin3/clash/common/net"
-	C "github.com/lijinglin3/clash/constant"
-	authStore "github.com/lijinglin3/clash/listener/auth"
+	cnet "github.com/lijinglin3/clash/common/net"
+	"github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/listener/auth"
 	"github.com/lijinglin3/clash/transport/socks4"
 	"github.com/lijinglin3/clash/transport/socks5"
 )
@@ -18,23 +18,23 @@ type Listener struct {
 	closed   bool
 }
 
-// RawAddress implements C.Listener
+// RawAddress implements constant.Listener
 func (l *Listener) RawAddress() string {
 	return l.addr
 }
 
-// Address implements C.Listener
+// Address implements constant.Listener
 func (l *Listener) Address() string {
 	return l.listener.Addr().String()
 }
 
-// Close implements C.Listener
+// Close implements constant.Listener
 func (l *Listener) Close() error {
 	l.closed = true
 	return l.listener.Close()
 }
 
-func New(addr string, in chan<- C.ConnContext) (C.Listener, error) {
+func New(addr string, in chan<- constant.ConnContext) (constant.Listener, error) {
 	l, err := net.Listen("tcp", addr)
 	if err != nil {
 		return nil, err
@@ -60,9 +60,9 @@ func New(addr string, in chan<- C.ConnContext) (C.Listener, error) {
 	return sl, nil
 }
 
-func handleSocks(conn net.Conn, in chan<- C.ConnContext) {
+func handleSocks(conn net.Conn, in chan<- constant.ConnContext) {
 	conn.(*net.TCPConn).SetKeepAlive(true)
-	bufConn := N.NewBufferedConn(conn)
+	bufConn := cnet.NewBufferedConn(conn)
 	head, err := bufConn.Peek(1)
 	if err != nil {
 		conn.Close()
@@ -79,17 +79,17 @@ func handleSocks(conn net.Conn, in chan<- C.ConnContext) {
 	}
 }
 
-func HandleSocks4(conn net.Conn, in chan<- C.ConnContext) {
-	addr, _, err := socks4.ServerHandshake(conn, authStore.Authenticator())
+func HandleSocks4(conn net.Conn, in chan<- constant.ConnContext) {
+	addr, _, err := socks4.ServerHandshake(conn, auth.Authenticator())
 	if err != nil {
 		conn.Close()
 		return
 	}
-	in <- inbound.NewSocket(socks5.ParseAddr(addr), conn, C.SOCKS4)
+	in <- inbound.NewSocket(socks5.ParseAddr(addr), conn, constant.SOCKS4)
 }
 
-func HandleSocks5(conn net.Conn, in chan<- C.ConnContext) {
-	target, command, err := socks5.ServerHandshake(conn, authStore.Authenticator())
+func HandleSocks5(conn net.Conn, in chan<- constant.ConnContext) {
+	target, command, err := socks5.ServerHandshake(conn, auth.Authenticator())
 	if err != nil {
 		conn.Close()
 		return
@@ -99,5 +99,5 @@ func HandleSocks5(conn net.Conn, in chan<- C.ConnContext) {
 		io.Copy(io.Discard, conn)
 		return
 	}
-	in <- inbound.NewSocket(target, conn, C.SOCKS5)
+	in <- inbound.NewSocket(target, conn, constant.SOCKS5)
 }

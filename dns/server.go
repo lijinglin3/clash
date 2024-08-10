@@ -8,7 +8,7 @@ import (
 	"github.com/lijinglin3/clash/context"
 	"github.com/lijinglin3/clash/log"
 
-	D "github.com/miekg/dns"
+	"github.com/miekg/dns"
 )
 
 var (
@@ -19,22 +19,22 @@ var (
 )
 
 type Server struct {
-	*D.Server
+	*dns.Server
 	handler handler
 }
 
 // ServeDNS implement D.Handler ServeDNS
-func (s *Server) ServeDNS(w D.ResponseWriter, r *D.Msg) {
+func (s *Server) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 	msg, err := handlerWithContext(s.handler, r)
 	if err != nil {
-		D.HandleFailed(w, r)
+		dns.HandleFailed(w, r)
 		return
 	}
 	msg.Compress = true
 	w.WriteMsg(msg)
 }
 
-func handlerWithContext(handler handler, msg *D.Msg) (*D.Msg, error) {
+func handlerWithContext(handler handler, msg *dns.Msg) (*dns.Msg, error) {
 	if len(msg.Question) == 0 {
 		return nil, errors.New("at least one question is required")
 	}
@@ -96,7 +96,7 @@ func ReCreateServer(addr string, resolver *Resolver, mapper *ResolverEnhancer) {
 	address = addr
 	handler := newHandler(resolver, mapper)
 	server = &Server{handler: handler}
-	server.Server = &D.Server{Addr: addr, PacketConn: p, Handler: server}
+	server.Server = &dns.Server{Addr: addr, PacketConn: p, Handler: server}
 
 	go func() {
 		server.ActivateAndServe()

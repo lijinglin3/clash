@@ -10,7 +10,7 @@ import (
 	"github.com/lijinglin3/clash/adapter"
 	"github.com/lijinglin3/clash/adapter/outboundgroup"
 	"github.com/lijinglin3/clash/component/profile/cachefile"
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 	"github.com/lijinglin3/clash/tunnel"
 
 	"github.com/go-chi/chi/v5"
@@ -62,7 +62,7 @@ func getProxies(w http.ResponseWriter, r *http.Request) {
 }
 
 func getProxy(w http.ResponseWriter, r *http.Request) {
-	proxy := r.Context().Value(CtxKeyProxy).(C.Proxy)
+	proxy := r.Context().Value(CtxKeyProxy).(constant.Proxy)
 	render.JSON(w, r, proxy)
 }
 
@@ -104,7 +104,7 @@ func getProxyDelay(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	proxy := r.Context().Value(CtxKeyProxy).(C.Proxy)
+	proxy := r.Context().Value(CtxKeyProxy).(constant.Proxy)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*time.Duration(timeout))
 	defer cancel()

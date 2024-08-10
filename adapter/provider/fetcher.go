@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
-	types "github.com/lijinglin3/clash/constant/provider"
+	"github.com/lijinglin3/clash/constant/provider"
 	"github.com/lijinglin3/clash/log"
 )
 
@@ -20,7 +20,7 @@ type parser = func([]byte) (any, error)
 
 type fetcher struct {
 	name      string
-	vehicle   types.Vehicle
+	vehicle   provider.Vehicle
 	interval  time.Duration
 	updatedAt *time.Time
 	ticker    *time.Ticker
@@ -34,7 +34,7 @@ func (f *fetcher) Name() string {
 	return f.name
 }
 
-func (f *fetcher) VehicleType() types.VehicleType {
+func (f *fetcher) VehicleType() provider.VehicleType {
 	return f.vehicle.Type()
 }
 
@@ -79,7 +79,7 @@ func (f *fetcher) Initial() (any, error) {
 		isLocal = false
 	}
 
-	if f.vehicle.Type() != types.File && !isLocal {
+	if f.vehicle.Type() != provider.File && !isLocal {
 		if err := safeWrite(f.vehicle.Path(), buf); err != nil {
 			return nil, err
 		}
@@ -114,7 +114,7 @@ func (f *fetcher) Update() (any, bool, error) {
 		return nil, false, err
 	}
 
-	if f.vehicle.Type() != types.File {
+	if f.vehicle.Type() != provider.File {
 		if err := safeWrite(f.vehicle.Path(), buf); err != nil {
 			return nil, false, err
 		}
@@ -179,7 +179,7 @@ func safeWrite(path string, buf []byte) error {
 	return os.WriteFile(path, buf, fileMode)
 }
 
-func newFetcher(name string, interval time.Duration, vehicle types.Vehicle, parser parser, onUpdate func(any)) *fetcher {
+func newFetcher(name string, interval time.Duration, vehicle provider.Vehicle, parser parser, onUpdate func(any)) *fetcher {
 	var ticker *time.Ticker
 	if interval != 0 {
 		ticker = time.NewTicker(interval)

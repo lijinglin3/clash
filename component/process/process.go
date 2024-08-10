@@ -16,6 +16,6 @@ const (
 	UDP = "udp"
 )
 
-func FindProcessPath(network string, from netip.AddrPort, to netip.AddrPort) (string, error) {
+func FindProcessPath(network string, from, to netip.AddrPort) (string, error) {
 	return findProcessPath(network, from, to)
 }

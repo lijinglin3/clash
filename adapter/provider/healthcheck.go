@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/lijinglin3/clash/common/batch"
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 
 	"github.com/samber/lo"
 	"go.uber.org/atomic"
@@ -22,7 +22,7 @@ type HealthCheckOption struct {
 
 type HealthCheck struct {
 	url       string
-	proxies   []C.Proxy
+	proxies   []constant.Proxy
 	interval  uint
 	lazy      bool
 	lastTouch *atomic.Int64
@@ -40,7 +40,7 @@ func (hc *HealthCheck) process() {
 			if !hc.lazy || now-hc.lastTouch.Load() < int64(hc.interval) {
 				hc.checkAll()
 			} else { // lazy but still need to check not alive proxies
-				notAliveProxies := lo.Filter(hc.proxies, func(proxy C.Proxy, _ int) bool {
+				notAliveProxies := lo.Filter(hc.proxies, func(proxy constant.Proxy, _ int) bool {
 					return !proxy.Alive()
 				})
 				if len(notAliveProxies) != 0 {
@@ -54,7 +54,7 @@ func (hc *HealthCheck) process() {
 	}
 }
 
-func (hc *HealthCheck) setProxy(proxies []C.Proxy) {
+func (hc *HealthCheck) setProxy(proxies []constant.Proxy) {
 	hc.proxies = proxies
 }
 
@@ -70,7 +70,7 @@ func (hc *HealthCheck) checkAll() {
 	hc.check(hc.proxies)
 }
 
-func (hc *HealthCheck) check(proxies []C.Proxy) {
+func (hc *HealthCheck) check(proxies []constant.Proxy) {
 	b, _ := batch.New(context.Background(), batch.WithConcurrencyNum(10))
 	for _, proxy := range proxies {
 		p := proxy
@@ -88,7 +88,7 @@ func (hc *HealthCheck) close() {
 	hc.done <- struct{}{}
 }
 
-func NewHealthCheck(proxies []C.Proxy, url string, interval uint, lazy bool) *HealthCheck {
+func NewHealthCheck(proxies []constant.Proxy, url string, interval uint, lazy bool) *HealthCheck {
 	return &HealthCheck{
 		proxies:   proxies,
 		url:       url,

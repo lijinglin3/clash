@@ -15,11 +15,11 @@ import (
 	"github.com/lijinglin3/clash/component/resolver"
 	"github.com/lijinglin3/clash/component/trie"
 	"github.com/lijinglin3/clash/config"
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 	"github.com/lijinglin3/clash/constant/provider"
 	"github.com/lijinglin3/clash/dns"
 	"github.com/lijinglin3/clash/listener"
-	authStore "github.com/lijinglin3/clash/listener/auth"
+	lauth "github.com/lijinglin3/clash/listener/auth"
 	"github.com/lijinglin3/clash/log"
 	"github.com/lijinglin3/clash/tunnel"
 )
@@ -44,7 +44,7 @@ func readConfig(path string) ([]byte, error) {
 
 // Parse config with default config path
 func Parse() (*config.Config, error) {
-	return ParseWithPath(C.Path.Config())
+	return ParseWithPath(constant.Path.Config())
 }
 
 // ParseWithPath parse config with custom config path
@@ -82,7 +82,7 @@ func ApplyConfig(cfg *config.Config, force bool) {
 func GetGeneral() *config.General {
 	ports := listener.GetPorts()
 	authenticator := []string{}
-	if auth := authStore.Authenticator(); auth != nil {
+	if auth := lauth.Authenticator(); auth != nil {
 		authenticator = auth.Users()
 	}
 
@@ -97,8 +97,8 @@ func GetGeneral() *config.General {
 			BindAddress: listener.BindAddress(),
 		},
 		Authentication: authenticator,
-		Mode:           tunnel.Mode(),
-		LogLevel:       log.Level(),
+		Mode:           tunnel.GetMode(),
+		LogLevel:       log.GetLevel(),
 		IPv6:           !resolver.DisableIPv6,
 	}
 
@@ -153,11 +153,11 @@ func updateHosts(tree *trie.DomainTrie) {
 	resolver.DefaultHosts = tree
 }
 
-func updateProxies(proxies map[string]C.Proxy, providers map[string]provider.ProxyProvider) {
+func updateProxies(proxies map[string]constant.Proxy, providers map[string]provider.ProxyProvider) {
 	tunnel.UpdateProxies(proxies, providers)
 }
 
-func updateRules(rules []C.Rule) {
+func updateRules(rules []constant.Rule) {
 	tunnel.UpdateRules(rules)
 }
 
@@ -165,7 +165,7 @@ func updateTunnels(tunnels []config.Tunnel) {
 	listener.PatchTunnel(tunnels, tunnel.TCPIn(), tunnel.UDPIn())
 }
 
-func updateInbounds(inbounds []C.Inbound, force bool) {
+func updateInbounds(inbounds []constant.Inbound, force bool) {
 	if !force {
 		return
 	}
@@ -205,9 +205,9 @@ func updateGeneral(general *config.General, force bool) {
 	listener.ReCreatePortsListeners(ports, tunnel.TCPIn(), tunnel.UDPIn())
 }
 
-func updateUsers(users []auth.AuthUser) {
+func updateUsers(users []auth.User) {
 	authenticator := auth.NewAuthenticator(users)
-	authStore.SetAuthenticator(authenticator)
+	lauth.SetAuthenticator(authenticator)
 	if authenticator != nil {
 		log.Infoln("Authentication of local server updated")
 	}
@@ -222,7 +222,7 @@ func updateProfile(cfg *config.Config) {
 	}
 }
 
-func patchSelectGroup(proxies map[string]C.Proxy) {
+func patchSelectGroup(proxies map[string]constant.Proxy) {
 	mapping := cachefile.Cache().SelectedMap()
 	if mapping == nil {
 		return

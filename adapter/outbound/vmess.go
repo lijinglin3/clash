@@ -12,7 +12,7 @@ import (
 
 	"github.com/lijinglin3/clash/component/dialer"
 	"github.com/lijinglin3/clash/component/resolver"
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 	"github.com/lijinglin3/clash/transport/gun"
 	"github.com/lijinglin3/clash/transport/socks5"
 	"github.com/lijinglin3/clash/transport/vmess"
@@ -74,8 +74,8 @@ type WSOptions struct {
 	EarlyDataHeaderName string            `proxy:"early-data-header-name,omitempty"`
 }
 
-// StreamConn implements C.ProxyAdapter
-func (v *Vmess) StreamConn(c net.Conn, metadata *C.Metadata) (net.Conn, error) {
+// StreamConn implements constant.ProxyAdapter
+func (v *Vmess) StreamConn(c net.Conn, metadata *constant.Metadata) (net.Conn, error) {
 	var err error
 	switch v.option.Network {
 	case "ws":
@@ -187,8 +187,8 @@ func (v *Vmess) StreamConn(c net.Conn, metadata *C.Metadata) (net.Conn, error) {
 	return v.client.StreamConn(c, parseVmessAddr(metadata))
 }
 
-// DialContext implements C.ProxyAdapter
-func (v *Vmess) DialContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (_ C.Conn, err error) {
+// DialContext implements constant.ProxyAdapter
+func (v *Vmess) DialContext(ctx context.Context, metadata *constant.Metadata, opts ...dialer.Option) (_ constant.Conn, err error) {
 	// gun transport
 	if v.transport != nil && len(opts) == 0 {
 		c, err := gun.StreamGunWithTransport(v.transport, v.gunConfig)
@@ -220,8 +220,8 @@ func (v *Vmess) DialContext(ctx context.Context, metadata *C.Metadata, opts ...d
 	return NewConn(c, v), err
 }
 
-// ListenPacketContext implements C.ProxyAdapter
-func (v *Vmess) ListenPacketContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (_ C.PacketConn, err error) {
+// ListenPacketContext implements constant.ProxyAdapter
+func (v *Vmess) ListenPacketContext(ctx context.Context, metadata *constant.Metadata, opts ...dialer.Option) (_ constant.PacketConn, err error) {
 	// vmess use stream-oriented udp with a special address, so we needs a net.UDPAddr
 	if !metadata.Resolved() {
 		ip, err := resolver.ResolveIP(metadata.Host)
@@ -292,9 +292,9 @@ func newVmess(option VmessOption, isVless bool) (*Vmess, error) {
 		}
 	}
 
-	tp := C.Vmess
+	tp := constant.Vmess
 	if isVless {
-		tp = C.Vless
+		tp = constant.Vless
 	}
 
 	v := &Vmess{
@@ -348,7 +348,7 @@ func newVmess(option VmessOption, isVless bool) (*Vmess, error) {
 	return v, nil
 }
 
-func parseVmessAddr(metadata *C.Metadata) *vmess.DstAddr {
+func parseVmessAddr(metadata *constant.Metadata) *vmess.DstAddr {
 	var addrType byte
 	var addr []byte
 	switch metadata.AddrType() {
@@ -368,7 +368,7 @@ func parseVmessAddr(metadata *C.Metadata) *vmess.DstAddr {
 	}
 
 	return &vmess.DstAddr{
-		UDP:      metadata.NetWork == C.UDP,
+		UDP:      metadata.NetWork == constant.UDP,
 		AddrType: addrType,
 		Addr:     addr,
 		Port:     uint(metadata.DstPort),
@@ -380,7 +380,7 @@ type vmessPacketConn struct {
 	rAddr net.Addr
 }
 
-// WriteTo implments C.PacketConn.WriteTo
+// WriteTo implments constant.PacketConn.WriteTo
 // Since VMess doesn't support full cone NAT by design, we verify if addr matches uc.rAddr, and drop the packet if not.
 func (uc *vmessPacketConn) WriteTo(b []byte, addr net.Addr) (int, error) {
 	allowedAddr := uc.rAddr.(*net.UDPAddr)

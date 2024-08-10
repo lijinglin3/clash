@@ -5,21 +5,21 @@ import (
 
 	"github.com/lijinglin3/clash/common/cache"
 	"github.com/lijinglin3/clash/component/fakeip"
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 )
 
 type ResolverEnhancer struct {
-	mode     C.DNSMode
+	mode     constant.DNSMode
 	fakePool *fakeip.Pool
 	mapping  *cache.LruCache
 }
 
 func (h *ResolverEnhancer) FakeIPEnabled() bool {
-	return h.mode == C.DNSFakeIP
+	return h.mode == constant.DNSFakeIP
 }
 
 func (h *ResolverEnhancer) MappingEnabled() bool {
-	return h.mode == C.DNSFakeIP || h.mode == C.DNSMapping
+	return h.mode == constant.DNSFakeIP || h.mode == constant.DNSMapping
 }
 
 func (h *ResolverEnhancer) IsExistFakeIP(ip net.IP) bool {
@@ -76,7 +76,7 @@ func NewEnhancer(cfg Config) *ResolverEnhancer {
 	var fakePool *fakeip.Pool
 	var mapping *cache.LruCache
 
-	if cfg.EnhancedMode != C.DNSNormal {
+	if cfg.EnhancedMode != constant.DNSNormal {
 		fakePool = cfg.Pool
 		mapping = cache.New(cache.WithSize(4096))
 	}

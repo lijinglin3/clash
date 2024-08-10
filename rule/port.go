@@ -1,10 +1,10 @@
-package rules
+package rule
 
 import (
 	"fmt"
 	"strconv"
 
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 )
 
 type PortType int
@@ -15,29 +15,29 @@ const (
 	PortTypeInbound
 )
 
-// Implements C.Rule
-var _ C.Rule = (*Port)(nil)
+// Implements constant.Rule
+var _ constant.Rule = (*Port)(nil)
 
 type Port struct {
 	adapter  string
-	port     C.Port
+	port     constant.Port
 	portType PortType
 }
 
-func (p *Port) RuleType() C.RuleType {
+func (p *Port) RuleType() constant.RuleType {
 	switch p.portType {
 	case PortTypeSrc:
-		return C.SrcPort
+		return constant.SrcPort
 	case PortTypeDest:
-		return C.DstPort
+		return constant.DstPort
 	case PortTypeInbound:
-		return C.InboundPort
+		return constant.InboundPort
 	default:
 		panic(fmt.Errorf("unknown port type: %v", p.portType))
 	}
 }
 
-func (p *Port) Match(metadata *C.Metadata) bool {
+func (p *Port) Match(metadata *constant.Metadata) bool {
 	switch p.portType {
 	case PortTypeSrc:
 		return metadata.SrcPort == p.port
@@ -66,14 +66,14 @@ func (p *Port) ShouldFindProcess() bool {
 	return false
 }
 
-func NewPort(port string, adapter string, portType PortType) (*Port, error) {
+func NewPort(port, adapter string, portType PortType) (*Port, error) {
 	p, err := strconv.ParseUint(port, 10, 16)
 	if err != nil {
 		return nil, errPayload
 	}
 	return &Port{
 		adapter:  adapter,
-		port:     C.Port(p),
+		port:     constant.Port(p),
 		portType: portType,
 	}, nil
 }

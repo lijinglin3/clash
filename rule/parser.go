@@ -1,50 +1,50 @@
-package rules
+package rule
 
 import (
 	"fmt"
 
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 )
 
-func ParseRule(tp, payload, target string, params []string) (C.Rule, error) {
+func ParseRule(tp, payload, target string, params []string) (constant.Rule, error) {
 	var (
 		parseErr error
-		parsed   C.Rule
+		parsed   constant.Rule
 	)
 
-	ruleConfigType := C.RuleConfig(tp)
+	ruleConfigType := constant.RuleConfig(tp)
 
 	switch ruleConfigType {
-	case C.RuleConfigDomain:
+	case constant.RuleConfigDomain:
 		parsed = NewDomain(payload, target)
-	case C.RuleConfigDomainSuffix:
+	case constant.RuleConfigDomainSuffix:
 		parsed = NewDomainSuffix(payload, target)
-	case C.RuleConfigDomainKeyword:
+	case constant.RuleConfigDomainKeyword:
 		parsed = NewDomainKeyword(payload, target)
-	case C.RuleConfigGeoIP:
+	case constant.RuleConfigGeoIP:
 		noResolve := HasNoResolve(params)
 		parsed = NewGEOIP(payload, target, noResolve)
-	case C.RuleConfigIPCIDR, C.RuleConfigIPCIDR6:
+	case constant.RuleConfigIPCIDR, constant.RuleConfigIPCIDR6:
 		noResolve := HasNoResolve(params)
 		parsed, parseErr = NewIPCIDR(payload, target, WithIPCIDRNoResolve(noResolve))
-	case C.RuleConfigSrcIPCIDR:
+	case constant.RuleConfigSrcIPCIDR:
 		parsed, parseErr = NewIPCIDR(payload, target, WithIPCIDRSourceIP(true), WithIPCIDRNoResolve(true))
-	case C.RuleConfigSrcPort:
+	case constant.RuleConfigSrcPort:
 		parsed, parseErr = NewPort(payload, target, PortTypeSrc)
-	case C.RuleConfigDstPort:
+	case constant.RuleConfigDstPort:
 		parsed, parseErr = NewPort(payload, target, PortTypeDest)
-	case C.RuleConfigInboundPort:
+	case constant.RuleConfigInboundPort:
 		parsed, parseErr = NewPort(payload, target, PortTypeInbound)
-	case C.RuleConfigProcessName:
+	case constant.RuleConfigProcessName:
 		parsed, parseErr = NewProcess(payload, target, true)
-	case C.RuleConfigProcessPath:
+	case constant.RuleConfigProcessPath:
 		parsed, parseErr = NewProcess(payload, target, false)
-	case C.RuleConfigIPSet:
+	case constant.RuleConfigIPSet:
 		noResolve := HasNoResolve(params)
 		parsed, parseErr = NewIPSet(payload, target, noResolve)
-	case C.RuleConfigMatch:
+	case constant.RuleConfigMatch:
 		parsed = NewMatch(target)
-	case C.RuleConfigRuleSet, C.RuleConfigScript:
+	case constant.RuleConfigRuleSet, constant.RuleConfigScript:
 		parseErr = fmt.Errorf("unsupported rule type %s", tp)
 	default:
 		parseErr = fmt.Errorf("unsupported rule type %s", tp)

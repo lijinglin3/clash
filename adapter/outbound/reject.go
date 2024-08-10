@@ -7,20 +7,20 @@ import (
 	"time"
 
 	"github.com/lijinglin3/clash/component/dialer"
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 )
 
 type Reject struct {
 	*Base
 }
 
-// DialContext implements C.ProxyAdapter
-func (r *Reject) DialContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (C.Conn, error) {
+// DialContext implements constant.ProxyAdapter
+func (r *Reject) DialContext(ctx context.Context, metadata *constant.Metadata, opts ...dialer.Option) (constant.Conn, error) {
 	return NewConn(&nopConn{}, r), nil
 }
 
-// ListenPacketContext implements C.ProxyAdapter
-func (r *Reject) ListenPacketContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (C.PacketConn, error) {
+// ListenPacketContext implements constant.ProxyAdapter
+func (r *Reject) ListenPacketContext(ctx context.Context, metadata *constant.Metadata, opts ...dialer.Option) (constant.PacketConn, error) {
 	return newPacketConn(&nopPacketConn{}, r), nil
 }
 
@@ -28,7 +28,7 @@ func NewReject() *Reject {
 	return &Reject{
 		Base: &Base{
 			name: "REJECT",
-			tp:   C.Reject,
+			tp:   constant.Reject,
 			udp:  true,
 		},
 	}

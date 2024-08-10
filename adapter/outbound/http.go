@@ -14,10 +14,10 @@ import (
 	"strconv"
 
 	"github.com/lijinglin3/clash/component/dialer"
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 )
 
-type Http struct {
+type HTTP struct {
 	*Base
 	user      string
 	pass      string
@@ -25,7 +25,7 @@ type Http struct {
 	Headers   http.Header
 }
 
-type HttpOption struct {
+type HTTPOption struct {
 	BasicOption
 	Name           string            `proxy:"name"`
 	Server         string            `proxy:"server"`
@@ -38,11 +38,11 @@ type HttpOption struct {
 	Headers        map[string]string `proxy:"headers,omitempty"`
 }
 
-// StreamConn implements C.ProxyAdapter
-func (h *Http) StreamConn(c net.Conn, metadata *C.Metadata) (net.Conn, error) {
+// StreamConn implements constant.ProxyAdapter
+func (h *HTTP) StreamConn(c net.Conn, metadata *constant.Metadata) (net.Conn, error) {
 	if h.tlsConfig != nil {
 		cc := tls.Client(c, h.tlsConfig)
-		ctx, cancel := context.WithTimeout(context.Background(), C.DefaultTLSTimeout)
+		ctx, cancel := context.WithTimeout(context.Background(), constant.DefaultTLSTimeout)
 		defer cancel()
 		err := cc.HandshakeContext(ctx)
 		c = cc
@@ -57,8 +57,8 @@ func (h *Http) StreamConn(c net.Conn, metadata *C.Metadata) (net.Conn, error) {
 	return c, nil
 }
 
-// DialContext implements C.ProxyAdapter
-func (h *Http) DialContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (_ C.Conn, err error) {
+// DialContext implements constant.ProxyAdapter
+func (h *HTTP) DialContext(ctx context.Context, metadata *constant.Metadata, opts ...dialer.Option) (_ constant.Conn, err error) {
 	c, err := dialer.DialContext(ctx, "tcp", h.addr, h.Base.DialOptions(opts...)...)
 	if err != nil {
 		return nil, fmt.Errorf("%s connect error: %w", h.addr, err)
@@ -77,7 +77,7 @@ func (h *Http) DialContext(ctx context.Context, metadata *C.Metadata, opts ...di
 	return NewConn(c, h), nil
 }
 
-func (h *Http) shakeHand(metadata *C.Metadata, rw io.ReadWriter) error {
+func (h *HTTP) shakeHand(metadata *constant.Metadata, rw io.ReadWriter) error {
 	addr := metadata.RemoteAddress()
 	req := &http.Request{
 		Method: http.MethodConnect,
@@ -123,7 +123,7 @@ func (h *Http) shakeHand(metadata *C.Metadata, rw io.ReadWriter) error {
 	return fmt.Errorf("can not connect remote err code: %d", resp.StatusCode)
 }
 
-func NewHttp(option HttpOption) *Http {
+func NewHTTP(option HTTPOption) *HTTP {
 	var tlsConfig *tls.Config
 	if option.TLS {
 		sni := option.Server
@@ -141,11 +141,11 @@ func NewHttp(option HttpOption) *Http {
 		headers.Add(name, value)
 	}
 
-	return &Http{
+	return &HTTP{
 		Base: &Base{
 			name:  option.Name,
 			addr:  net.JoinHostPort(option.Server, strconv.Itoa(option.Port)),
-			tp:    C.Http,
+			tp:    constant.Http,
 			iface: option.Interface,
 			rmark: option.RoutingMark,
 		},

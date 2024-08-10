@@ -126,7 +126,7 @@ func TestExist(t *testing.T) {
 
 func TestEvict(t *testing.T) {
 	temp := 0
-	evict := func(key any, value any) {
+	evict := func(key, value any) {
 		temp = key.(int) + value.(int)
 	}
 

@@ -80,15 +80,15 @@ func (wsc *websocketConn) Write(b []byte) (int, error) {
 }
 
 func (wsc *websocketConn) Close() error {
-	var errors []string
+	var errs []string
 	if err := wsc.conn.WriteControl(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""), time.Now().Add(time.Second*5)); err != nil {
-		errors = append(errors, err.Error())
+		errs = append(errs, err.Error())
 	}
 	if err := wsc.conn.Close(); err != nil {
-		errors = append(errors, err.Error())
+		errs = append(errs, err.Error())
 	}
-	if len(errors) > 0 {
-		return fmt.Errorf("failed to close connection: %s", strings.Join(errors, ","))
+	if len(errs) > 0 {
+		return fmt.Errorf("failed to close connection: %s", strings.Join(errs, ","))
 	}
 	return nil
 }

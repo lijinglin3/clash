@@ -3,23 +3,23 @@ package nat
 import (
 	"sync"
 
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 )
 
 type Table struct {
 	mapping sync.Map
 }
 
-func (t *Table) Set(key string, pc C.PacketConn) {
+func (t *Table) Set(key string, pc constant.PacketConn) {
 	t.mapping.Store(key, pc)
 }
 
-func (t *Table) Get(key string) C.PacketConn {
+func (t *Table) Get(key string) constant.PacketConn {
 	item, exist := t.mapping.Load(key)
 	if !exist {
 		return nil
 	}
-	return item.(C.PacketConn)
+	return item.(constant.PacketConn)
 }
 
 func (t *Table) GetOrCreateLock(key string) (*sync.Cond, bool) {

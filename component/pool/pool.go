@@ -108,7 +108,7 @@ func New(factory Factory, options ...Option) *Pool {
 		option(p)
 	}
 
-	P := &Pool{p}
-	runtime.SetFinalizer(P, recycle)
-	return P
+	pool := &Pool{p}
+	runtime.SetFinalizer(pool, recycle)
+	return pool
 }

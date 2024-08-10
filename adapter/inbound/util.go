@@ -8,43 +8,43 @@ import (
 	"strings"
 
 	"github.com/lijinglin3/clash/common/util"
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 	"github.com/lijinglin3/clash/transport/socks5"
 )
 
-func parseSocksAddr(target socks5.Addr) *C.Metadata {
-	metadata := &C.Metadata{}
+func parseSocksAddr(target socks5.Addr) *constant.Metadata {
+	metadata := &constant.Metadata{}
 
 	switch target[0] {
 	case socks5.AtypDomainName:
 		// trim for FQDN
 		metadata.Host = strings.TrimRight(string(target[2:2+target[1]]), ".")
-		metadata.DstPort = C.Port((int(target[2+target[1]]) << 8) | int(target[2+target[1]+1]))
+		metadata.DstPort = constant.Port((int(target[2+target[1]]) << 8) | int(target[2+target[1]+1]))
 	case socks5.AtypIPv4:
 		ip := net.IP(target[1 : 1+net.IPv4len])
 		metadata.DstIP = ip
-		metadata.DstPort = C.Port((int(target[1+net.IPv4len]) << 8) | int(target[1+net.IPv4len+1]))
+		metadata.DstPort = constant.Port((int(target[1+net.IPv4len]) << 8) | int(target[1+net.IPv4len+1]))
 	case socks5.AtypIPv6:
 		ip := net.IP(target[1 : 1+net.IPv6len])
 		metadata.DstIP = ip
-		metadata.DstPort = C.Port((int(target[1+net.IPv6len]) << 8) | int(target[1+net.IPv6len+1]))
+		metadata.DstPort = constant.Port((int(target[1+net.IPv6len]) << 8) | int(target[1+net.IPv6len+1]))
 	}
 
 	return metadata
 }
 
-func parseHTTPAddr(request *http.Request) *C.Metadata {
+func parseHTTPAddr(request *http.Request) *constant.Metadata {
 	host := request.URL.Hostname()
 	port, _ := strconv.ParseUint(util.EmptyOr(request.URL.Port(), "80"), 10, 16)
 
 	// trim FQDN (#737)
 	host = strings.TrimRight(host, ".")
 
-	metadata := &C.Metadata{
-		NetWork: C.TCP,
+	metadata := &constant.Metadata{
+		NetWork: constant.TCP,
 		Host:    host,
 		DstIP:   nil,
-		DstPort: C.Port(port),
+		DstPort: constant.Port(port),
 	}
 
 	if ip := net.ParseIP(host); ip != nil {

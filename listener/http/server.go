@@ -4,7 +4,7 @@ import (
 	"net"
 
 	"github.com/lijinglin3/clash/common/cache"
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 )
 
 type Listener struct {
@@ -13,27 +13,27 @@ type Listener struct {
 	closed   bool
 }
 
-// RawAddress implements C.Listener
+// RawAddress implements constant.Listener
 func (l *Listener) RawAddress() string {
 	return l.addr
 }
 
-// Address implements C.Listener
+// Address implements constant.Listener
 func (l *Listener) Address() string {
 	return l.listener.Addr().String()
 }
 
-// Close implements C.Listener
+// Close implements constant.Listener
 func (l *Listener) Close() error {
 	l.closed = true
 	return l.listener.Close()
 }
 
-func New(addr string, in chan<- C.ConnContext) (C.Listener, error) {
+func New(addr string, in chan<- constant.ConnContext) (constant.Listener, error) {
 	return NewWithAuthenticate(addr, in, true)
 }
 
-func NewWithAuthenticate(addr string, in chan<- C.ConnContext, authenticate bool) (C.Listener, error) {
+func NewWithAuthenticate(addr string, in chan<- constant.ConnContext, authenticate bool) (constant.Listener, error) {
 	l, err := net.Listen("tcp", addr)
 	if err != nil {
 		return nil, err

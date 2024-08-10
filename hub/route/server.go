@@ -10,7 +10,7 @@ import (
 	"time"
 	"unsafe"
 
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 	"github.com/lijinglin3/clash/log"
 	"github.com/lijinglin3/clash/tunnel/statistic"
 
@@ -40,10 +40,10 @@ type Traffic struct {
 }
 
 func SetUIPath(path string) {
-	uiPath = C.Path.Resolve(path)
+	uiPath = constant.Path.Resolve(path)
 }
 
-func Start(addr string, secret string) {
+func Start(addr, secret string) {
 	if serverAddr != "" {
 		return
 	}
@@ -197,7 +197,7 @@ func getLogs(w http.ResponseWriter, r *http.Request) {
 		levelText = "info"
 	}
 
-	level, ok := log.LogLevelMapping[levelText]
+	level, ok := log.LevelMapping[levelText]
 	if !ok {
 		render.Status(r, http.StatusBadRequest)
 		render.JSON(w, r, ErrBadRequest)
@@ -262,5 +262,5 @@ func getLogs(w http.ResponseWriter, r *http.Request) {
 }
 
 func version(w http.ResponseWriter, r *http.Request) {
-	render.JSON(w, r, render.M{"version": C.Version})
+	render.JSON(w, r, render.M{"version": constant.Version})
 }

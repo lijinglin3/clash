@@ -3,7 +3,7 @@ package route
 import (
 	"net/http"
 
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 	"github.com/lijinglin3/clash/listener"
 	"github.com/lijinglin3/clash/tunnel"
 
@@ -26,7 +26,7 @@ func getInbounds(w http.ResponseWriter, r *http.Request) {
 }
 
 func updateInbounds(w http.ResponseWriter, r *http.Request) {
-	var req []C.Inbound
+	var req []constant.Inbound
 	if err := render.DecodeJSON(r.Body, &req); err != nil {
 		render.Status(r, http.StatusBadRequest)
 		render.JSON(w, r, ErrBadRequest)

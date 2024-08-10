@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/lijinglin3/clash/component/resolver"
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 	"github.com/lijinglin3/clash/transport/socks5"
 
 	"github.com/Dreamacro/protobytes"
@@ -18,7 +18,7 @@ func tcpKeepAlive(c net.Conn) {
 	}
 }
 
-func serializesSocksAddr(metadata *C.Metadata) []byte {
+func serializesSocksAddr(metadata *constant.Metadata) []byte {
 	buf := protobytes.BytesWriter{}
 
 	addrType := metadata.AddrType()

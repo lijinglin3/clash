@@ -35,14 +35,14 @@ type Vehicle interface {
 
 // Provider Type
 const (
-	Proxy ProviderType = iota
+	Proxy Type = iota
 	Rule
 )
 
-// ProviderType defined
-type ProviderType int
+// Type defined
+type Type int
 
-func (pt ProviderType) String() string {
+func (pt Type) String() string {
 	switch pt {
 	case Proxy:
 		return "Proxy"
@@ -57,7 +57,7 @@ func (pt ProviderType) String() string {
 type Provider interface {
 	Name() string
 	VehicleType() VehicleType
-	Type() ProviderType
+	Type() Type
 	Initial() error
 	Update() error
 }

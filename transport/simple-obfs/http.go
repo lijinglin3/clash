@@ -6,7 +6,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
-	mathRand "math/rand"
+	mathrand "math/rand"
 	"net"
 	"net/http"
 
@@ -66,7 +66,7 @@ func (ho *HTTPObfs) Write(b []byte) (int, error) {
 		randBytes := make([]byte, 16)
 		rand.Read(randBytes)
 		req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%s/", ho.host), bytes.NewBuffer(b[:]))
-		req.Header.Set("User-Agent", fmt.Sprintf("curl/7.%d.%d", mathRand.Int()%54, mathRand.Int()%2))
+		req.Header.Set("User-Agent", fmt.Sprintf("curl/7.%d.%d", mathrand.Int()%54, mathrand.Int()%2))
 		req.Header.Set("Upgrade", "websocket")
 		req.Header.Set("Connection", "Upgrade")
 		req.Host = ho.host
@@ -84,7 +84,7 @@ func (ho *HTTPObfs) Write(b []byte) (int, error) {
 }
 
 // NewHTTPObfs return a HTTPObfs
-func NewHTTPObfs(conn net.Conn, host string, port string) net.Conn {
+func NewHTTPObfs(conn net.Conn, host, port string) net.Conn {
 	return &HTTPObfs{
 		Conn:          conn,
 		firstRequest:  true,

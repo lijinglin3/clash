@@ -1,21 +1,21 @@
-package rules
+package rule
 
 import (
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 )
 
-// Implements C.Rule
-var _ C.Rule = (*Match)(nil)
+// Implements constant.Rule
+var _ constant.Rule = (*Match)(nil)
 
 type Match struct {
 	adapter string
 }
 
-func (f *Match) RuleType() C.RuleType {
-	return C.MATCH
+func (f *Match) RuleType() constant.RuleType {
+	return constant.MATCH
 }
 
-func (f *Match) Match(metadata *C.Metadata) bool {
+func (f *Match) Match(metadata *constant.Metadata) bool {
 	return true
 }
 

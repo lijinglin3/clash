@@ -24,7 +24,7 @@ func TestBasic(t *testing.T) {
 	wg.Add(n)
 	for i := 0; i < n; i++ {
 		go func() {
-			_, _, shard := single.Do(call)
+			shard, _, _ := single.Do(call)
 			if shard {
 				shardCount.Inc()
 			}
@@ -47,7 +47,7 @@ func TestTimer(t *testing.T) {
 
 	single.Do(call)
 	time.Sleep(10 * time.Millisecond)
-	_, _, shard := single.Do(call)
+	shard, _, _ := single.Do(call)
 
 	assert.Equal(t, 1, foo)
 	assert.True(t, shard)

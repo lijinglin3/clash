@@ -8,20 +8,20 @@ import (
 
 	"github.com/lijinglin3/clash/adapter/inbound"
 	"github.com/lijinglin3/clash/common/cache"
-	N "github.com/lijinglin3/clash/common/net"
-	C "github.com/lijinglin3/clash/constant"
-	authStore "github.com/lijinglin3/clash/listener/auth"
+	cnet "github.com/lijinglin3/clash/common/net"
+	"github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/listener/auth"
 	"github.com/lijinglin3/clash/log"
 )
 
-func HandleConn(c net.Conn, in chan<- C.ConnContext, cache *cache.LruCache) {
+func HandleConn(c net.Conn, in chan<- constant.ConnContext, lru *cache.LruCache) {
 	client := newClient(c.RemoteAddr(), c.LocalAddr(), in)
 	defer client.CloseIdleConnections()
 
-	conn := N.NewBufferedConn(c)
+	conn := cnet.NewBufferedConn(c)
 
 	keepAlive := true
-	trusted := cache == nil // disable authenticate if cache is nil
+	trusted := lru == nil // disable authenticate if cache is nil
 
 	for keepAlive {
 		request, err := ReadRequest(conn.Reader())
@@ -36,7 +36,7 @@ func HandleConn(c net.Conn, in chan<- C.ConnContext, cache *cache.LruCache) {
 		var resp *http.Response
 
 		if !trusted {
-			resp = authenticate(request, cache)
+			resp = authenticate(request, lru)
 
 			trusted = resp == nil
 		}
@@ -98,8 +98,8 @@ func HandleConn(c net.Conn, in chan<- C.ConnContext, cache *cache.LruCache) {
 	conn.Close()
 }
 
-func authenticate(request *http.Request, cache *cache.LruCache) *http.Response {
-	authenticator := authStore.Authenticator()
+func authenticate(request *http.Request, lru *cache.LruCache) *http.Response {
+	authenticator := auth.Authenticator()
 	if authenticator != nil {
 		credential := parseBasicProxyAuthorization(request)
 		if credential == "" {
@@ -108,11 +108,11 @@ func authenticate(request *http.Request, cache *cache.LruCache) *http.Response {
 			return resp
 		}
 
-		authed, exist := cache.Get(credential)
+		authed, exist := lru.Get(credential)
 		if !exist {
 			user, pass, err := decodeBasicProxyAuthorization(credential)
 			authed = err == nil && authenticator.Verify(user, pass)
-			cache.Set(credential, authed)
+			lru.Set(credential, authed)
 		}
 		if !authed.(bool) {
 			log.Infoln("Auth failed from %s", request.RemoteAddr)

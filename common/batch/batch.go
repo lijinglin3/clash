@@ -82,11 +82,11 @@ func (b *Batch) WaitAndGetResult() (map[string]Result, *Error) {
 func (b *Batch) Result() map[string]Result {
 	b.mux.Lock()
 	defer b.mux.Unlock()
-	copy := map[string]Result{}
+	ret := map[string]Result{}
 	for k, v := range b.result {
-		copy[k] = v
+		ret[k] = v
 	}
-	return copy
+	return ret
 }
 
 func New(ctx context.Context, opts ...Option) (*Batch, context.Context) {

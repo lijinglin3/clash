@@ -37,7 +37,7 @@ type domainFilter struct {
 	tree *trie.DomainTrie
 }
 
-func NewDomainFilter(domains []string) *domainFilter {
+func newDomainFilter(domains []string) *domainFilter {
 	df := domainFilter{tree: trie.New()}
 	for _, domain := range domains {
 		df.tree.Insert(domain, "")

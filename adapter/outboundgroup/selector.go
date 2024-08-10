@@ -8,7 +8,7 @@ import (
 	"github.com/lijinglin3/clash/adapter/outbound"
 	"github.com/lijinglin3/clash/common/singledo"
 	"github.com/lijinglin3/clash/component/dialer"
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 	"github.com/lijinglin3/clash/constant/provider"
 )
 
@@ -20,8 +20,8 @@ type Selector struct {
 	providers  []provider.ProxyProvider
 }
 
-// DialContext implements C.ProxyAdapter
-func (s *Selector) DialContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (C.Conn, error) {
+// DialContext implements constant.ProxyAdapter
+func (s *Selector) DialContext(ctx context.Context, metadata *constant.Metadata, opts ...dialer.Option) (constant.Conn, error) {
 	c, err := s.selectedProxy(true).DialContext(ctx, metadata, s.Base.DialOptions(opts...)...)
 	if err == nil {
 		c.AppendToChains(s)
@@ -29,8 +29,8 @@ func (s *Selector) DialContext(ctx context.Context, metadata *C.Metadata, opts .
 	return c, err
 }
 
-// ListenPacketContext implements C.ProxyAdapter
-func (s *Selector) ListenPacketContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (C.PacketConn, error) {
+// ListenPacketContext implements constant.ProxyAdapter
+func (s *Selector) ListenPacketContext(ctx context.Context, metadata *constant.Metadata, opts ...dialer.Option) (constant.PacketConn, error) {
 	pc, err := s.selectedProxy(true).ListenPacketContext(ctx, metadata, s.Base.DialOptions(opts...)...)
 	if err == nil {
 		pc.AppendToChains(s)
@@ -38,7 +38,7 @@ func (s *Selector) ListenPacketContext(ctx context.Context, metadata *C.Metadata
 	return pc, err
 }
 
-// SupportUDP implements C.ProxyAdapter
+// SupportUDP implements constant.ProxyAdapter
 func (s *Selector) SupportUDP() bool {
 	if s.disableUDP {
 		return false
@@ -47,7 +47,7 @@ func (s *Selector) SupportUDP() bool {
 	return s.selectedProxy(false).SupportUDP()
 }
 
-// MarshalJSON implements C.ProxyAdapter
+// MarshalJSON implements constant.ProxyAdapter
 func (s *Selector) MarshalJSON() ([]byte, error) {
 	var all []string
 	for _, proxy := range getProvidersProxies(s.providers, false) {
@@ -77,13 +77,13 @@ func (s *Selector) Set(name string) error {
 	return errors.New("proxy not exist")
 }
 
-// Unwrap implements C.ProxyAdapter
-func (s *Selector) Unwrap(metadata *C.Metadata) C.Proxy {
+// Unwrap implements constant.ProxyAdapter
+func (s *Selector) Unwrap(metadata *constant.Metadata) constant.Proxy {
 	return s.selectedProxy(true)
 }
 
-func (s *Selector) selectedProxy(touch bool) C.Proxy {
-	elm, _, _ := s.single.Do(func() (any, error) {
+func (s *Selector) selectedProxy(touch bool) constant.Proxy {
+	_, elm, _ := s.single.Do(func() (any, error) {
 		proxies := getProvidersProxies(s.providers, touch)
 		for _, proxy := range proxies {
 			if proxy.Name() == s.selected {
@@ -94,7 +94,7 @@ func (s *Selector) selectedProxy(touch bool) C.Proxy {
 		return proxies[0], nil
 	})
 
-	return elm.(C.Proxy)
+	return elm.(constant.Proxy)
 }
 
 func NewSelector(option *GroupCommonOption, providers []provider.ProxyProvider) *Selector {
@@ -102,7 +102,7 @@ func NewSelector(option *GroupCommonOption, providers []provider.ProxyProvider) 
 	return &Selector{
 		Base: outbound.NewBase(outbound.BaseOption{
 			Name:        option.Name,
-			Type:        C.Selector,
+			Type:        constant.Selector,
 			Interface:   option.Interface,
 			RoutingMark: option.RoutingMark,
 		}),

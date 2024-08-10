@@ -8,22 +8,22 @@ import (
 	"github.com/lijinglin3/clash/transport/socks5"
 )
 
-func parserPacket(c net.Conn) (socks5.Addr, error) {
-	const (
-		PfInout     = 0
-		PfIn        = 1
-		PfOut       = 2
-		IOCOut      = 0x40000000
-		IOCIn       = 0x80000000
-		IOCInOut    = IOCIn | IOCOut
-		IOCPARMMask = 0x1FFF
-		LEN         = 4*16 + 4*4 + 4*1
-		// #define	_IOC(inout,group,num,len) (inout | ((len & IOCPARMMask) << 16) | ((group) << 8) | (num))
-		// #define	_IOWR(g,n,t)	_IOC(IOCInOut,	(g), (n), sizeof(t))
-		// #define DIOCNATLOOK		_IOWR('D', 23, struct pfioc_natlook)
-		DIOCNATLOOK = IOCInOut | ((LEN & IOCPARMMask) << 16) | ('D' << 8) | 23
-	)
+const (
+	PfInout     = 0
+	PfIn        = 1
+	PfOut       = 2
+	IOCOut      = 0x40000000
+	IOCIn       = 0x80000000
+	IOCInOut    = IOCIn | IOCOut
+	IOCPARMMask = 0x1FFF
+	LEN         = 4*16 + 4*4 + 4*1
+	// #define	_IOC(inout,group,num,len) (inout | ((len & IOCPARMMask) << 16) | ((group) << 8) | (num))
+	// #define	_IOWR(g,n,t)	_IOC(IOCInOut,	(g), (n), sizeof(t))
+	// #define DIOCNATLOOK		_IOWR('D', 23, struct pfioc_natlook)
+	DIOCNATLOOK = IOCInOut | ((LEN & IOCPARMMask) << 16) | ('D' << 8) | 23
+)
 
+func parserPacket(c net.Conn) (socks5.Addr, error) {
 	fd, err := syscall.Open("/dev/pf", 0, syscall.O_RDONLY)
 	if err != nil {
 		return nil, err

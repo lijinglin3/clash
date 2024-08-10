@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 
-	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 )
@@ -16,16 +15,16 @@ func startContainer(cfg *container.Config, hostCfg *container.HostConfig, name s
 	defer c.Close()
 
 	hostCfg.NetworkMode = "host"
-	container, err := c.ContainerCreate(context.Background(), cfg, hostCfg, nil, nil, name)
+	ctn, err := c.ContainerCreate(context.Background(), cfg, hostCfg, nil, nil, name)
 	if err != nil {
 		return "", err
 	}
 
-	if err = c.ContainerStart(context.Background(), container.ID, types.ContainerStartOptions{}); err != nil {
+	if err = c.ContainerStart(context.Background(), ctn.ID, container.StartOptions{}); err != nil {
 		return "", err
 	}
 
-	return container.ID, nil
+	return ctn.ID, nil
 }
 
 func cleanContainer(id string) error {
@@ -35,6 +34,6 @@ func cleanContainer(id string) error {
 	}
 	defer c.Close()
 
-	removeOpts := types.ContainerRemoveOptions{Force: true}
+	removeOpts := container.RemoveOptions{Force: true}
 	return c.ContainerRemove(context.Background(), id, removeOpts)
 }

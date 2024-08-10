@@ -6,7 +6,7 @@ import (
 
 	"github.com/lijinglin3/clash/adapter/inbound"
 	"github.com/lijinglin3/clash/common/pool"
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 	"github.com/lijinglin3/clash/transport/socks5"
 )
 
@@ -18,17 +18,17 @@ type PacketConn struct {
 	closed bool
 }
 
-// RawAddress implements C.Listener
+// RawAddress implements constant.Listener
 func (l *PacketConn) RawAddress() string {
 	return l.addr
 }
 
-// Address implements C.Listener
+// Address implements constant.Listener
 func (l *PacketConn) Address() string {
 	return l.conn.LocalAddr().String()
 }
 
-// Close implements C.Listener
+// Close implements constant.Listener
 func (l *PacketConn) Close() error {
 	l.closed = true
 	return l.conn.Close()
@@ -76,7 +76,7 @@ func (l *PacketConn) handleUDP(pc net.PacketConn, in chan<- *inbound.PacketAdapt
 		payload: buf,
 	}
 
-	ctx := inbound.NewPacket(l.target, pc.LocalAddr(), packet, C.TUNNEL)
+	ctx := inbound.NewPacket(l.target, pc.LocalAddr(), packet, constant.TUNNEL)
 	ctx.Metadata().SpecialProxy = l.proxy
 	select {
 	case in <- ctx:

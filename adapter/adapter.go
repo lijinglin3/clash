@@ -12,62 +12,62 @@ import (
 
 	"github.com/lijinglin3/clash/common/queue"
 	"github.com/lijinglin3/clash/component/dialer"
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 
 	"go.uber.org/atomic"
 )
 
 type Proxy struct {
-	C.ProxyAdapter
+	constant.ProxyAdapter
 	history *queue.Queue
 	alive   *atomic.Bool
 }
 
-// Alive implements C.Proxy
+// Alive implements constant.Proxy
 func (p *Proxy) Alive() bool {
 	return p.alive.Load()
 }
 
-// Dial implements C.Proxy
-func (p *Proxy) Dial(metadata *C.Metadata) (C.Conn, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), C.DefaultTCPTimeout)
+// Dial implements constant.Proxy
+func (p *Proxy) Dial(metadata *constant.Metadata) (constant.Conn, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), constant.DefaultTCPTimeout)
 	defer cancel()
 	return p.DialContext(ctx, metadata)
 }
 
-// DialContext implements C.ProxyAdapter
-func (p *Proxy) DialContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (C.Conn, error) {
+// DialContext implements constant.ProxyAdapter
+func (p *Proxy) DialContext(ctx context.Context, metadata *constant.Metadata, opts ...dialer.Option) (constant.Conn, error) {
 	conn, err := p.ProxyAdapter.DialContext(ctx, metadata, opts...)
 	p.alive.Store(err == nil)
 	return conn, err
 }
 
-// DialUDP implements C.ProxyAdapter
-func (p *Proxy) DialUDP(metadata *C.Metadata) (C.PacketConn, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), C.DefaultUDPTimeout)
+// DialUDP implements constant.ProxyAdapter
+func (p *Proxy) DialUDP(metadata *constant.Metadata) (constant.PacketConn, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), constant.DefaultUDPTimeout)
 	defer cancel()
 	return p.ListenPacketContext(ctx, metadata)
 }
 
-// ListenPacketContext implements C.ProxyAdapter
-func (p *Proxy) ListenPacketContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (C.PacketConn, error) {
+// ListenPacketContext implements constant.ProxyAdapter
+func (p *Proxy) ListenPacketContext(ctx context.Context, metadata *constant.Metadata, opts ...dialer.Option) (constant.PacketConn, error) {
 	pc, err := p.ProxyAdapter.ListenPacketContext(ctx, metadata, opts...)
 	p.alive.Store(err == nil)
 	return pc, err
 }
 
-// DelayHistory implements C.Proxy
-func (p *Proxy) DelayHistory() []C.DelayHistory {
-	queue := p.history.Copy()
-	histories := []C.DelayHistory{}
-	for _, item := range queue {
-		histories = append(histories, item.(C.DelayHistory))
+// DelayHistory implements constant.Proxy
+func (p *Proxy) DelayHistory() []constant.DelayHistory {
+	history := p.history.Copy()
+	var histories []constant.DelayHistory
+	for _, item := range history {
+		histories = append(histories, item.(constant.DelayHistory))
 	}
 	return histories
 }
 
 // LastDelay return last history record. if proxy is not alive, return the max value of uint16.
-// implements C.Proxy
+// implements constant.Proxy
 func (p *Proxy) LastDelay() (delay uint16) {
 	var max uint16 = 0xffff
 	if !p.alive.Load() {
@@ -78,14 +78,14 @@ func (p *Proxy) LastDelay() (delay uint16) {
 	if last == nil {
 		return max
 	}
-	history := last.(C.DelayHistory)
+	history := last.(constant.DelayHistory)
 	if history.Delay == 0 {
 		return max
 	}
 	return history.Delay
 }
 
-// MarshalJSON implements C.ProxyAdapter
+// MarshalJSON implements constant.ProxyAdapter
 func (p *Proxy) MarshalJSON() ([]byte, error) {
 	inner, err := p.ProxyAdapter.MarshalJSON()
 	if err != nil {
@@ -102,11 +102,11 @@ func (p *Proxy) MarshalJSON() ([]byte, error) {
 }
 
 // URLTest get the delay for the specified URL
-// implements C.Proxy
-func (p *Proxy) URLTest(ctx context.Context, url string) (delay, meanDelay uint16, err error) {
+// implements constant.Proxy
+func (p *Proxy) URLTest(ctx context.Context, u string) (delay, meanDelay uint16, err error) {
 	defer func() {
 		p.alive.Store(err == nil)
-		record := C.DelayHistory{Time: time.Now()}
+		record := constant.DelayHistory{Time: time.Now()}
 		if err == nil {
 			record.Delay = delay
 			record.MeanDelay = meanDelay
@@ -117,7 +117,7 @@ func (p *Proxy) URLTest(ctx context.Context, url string) (delay, meanDelay uint1
 		}
 	}()
 
-	addr, err := urlToMetadata(url)
+	addr, err := urlToMetadata(u)
 	if err != nil {
 		return
 	}
@@ -129,7 +129,7 @@ func (p *Proxy) URLTest(ctx context.Context, url string) (delay, meanDelay uint1
 	}
 	defer instance.Close()
 
-	req, err := http.NewRequest(http.MethodHead, url, nil)
+	req, err := http.NewRequest(http.MethodHead, u, nil)
 	if err != nil {
 		return
 	}
@@ -172,11 +172,11 @@ func (p *Proxy) URLTest(ctx context.Context, url string) (delay, meanDelay uint1
 	return
 }
 
-func NewProxy(adapter C.ProxyAdapter) *Proxy {
+func NewProxy(adapter constant.ProxyAdapter) *Proxy {
 	return &Proxy{adapter, queue.New(10), atomic.NewBool(true)}
 }
 
-func urlToMetadata(rawURL string) (addr C.Metadata, err error) {
+func urlToMetadata(rawURL string) (addr constant.Metadata, err error) {
 	u, err := url.Parse(rawURL)
 	if err != nil {
 		return
@@ -197,10 +197,10 @@ func urlToMetadata(rawURL string) (addr C.Metadata, err error) {
 
 	p, _ := strconv.ParseUint(port, 10, 16)
 
-	addr = C.Metadata{
+	addr = constant.Metadata{
 		Host:    u.Hostname(),
 		DstIP:   nil,
-		DstPort: C.Port(p),
+		DstPort: constant.Port(p),
 	}
 	return
 }

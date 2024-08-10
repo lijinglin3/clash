@@ -8,7 +8,7 @@ import (
 	"github.com/lijinglin3/clash/adapter/outbound"
 	"github.com/lijinglin3/clash/common/singledo"
 	"github.com/lijinglin3/clash/component/dialer"
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 	"github.com/lijinglin3/clash/constant/provider"
 )
 
@@ -18,11 +18,11 @@ type Relay struct {
 	providers []provider.ProxyProvider
 }
 
-// DialContext implements C.ProxyAdapter
-func (r *Relay) DialContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (C.Conn, error) {
-	var proxies []C.Proxy
+// DialContext implements constant.ProxyAdapter
+func (r *Relay) DialContext(ctx context.Context, metadata *constant.Metadata, opts ...dialer.Option) (constant.Conn, error) {
+	var proxies []constant.Proxy
 	for _, proxy := range r.proxies(metadata, true) {
-		if proxy.Type() != C.Direct {
+		if proxy.Type() != constant.Direct {
 			proxies = append(proxies, proxy)
 		}
 	}
@@ -43,7 +43,7 @@ func (r *Relay) DialContext(ctx context.Context, metadata *C.Metadata, opts ...d
 	}
 	tcpKeepAlive(c)
 
-	var currentMeta *C.Metadata
+	var currentMeta *constant.Metadata
 	for _, proxy := range proxies[1:] {
 		currentMeta, err = addrToMetadata(proxy.Addr())
 		if err != nil {
@@ -66,7 +66,7 @@ func (r *Relay) DialContext(ctx context.Context, metadata *C.Metadata, opts ...d
 	return outbound.NewConn(c, r), nil
 }
 
-// MarshalJSON implements C.ProxyAdapter
+// MarshalJSON implements constant.ProxyAdapter
 func (r *Relay) MarshalJSON() ([]byte, error) {
 	var all []string
 	for _, proxy := range r.rawProxies(false) {
@@ -78,15 +78,15 @@ func (r *Relay) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func (r *Relay) rawProxies(touch bool) []C.Proxy {
-	elm, _, _ := r.single.Do(func() (any, error) {
+func (r *Relay) rawProxies(touch bool) []constant.Proxy {
+	_, elm, _ := r.single.Do(func() (any, error) {
 		return getProvidersProxies(r.providers, touch), nil
 	})
 
-	return elm.([]C.Proxy)
+	return elm.([]constant.Proxy)
 }
 
-func (r *Relay) proxies(metadata *C.Metadata, touch bool) []C.Proxy {
+func (r *Relay) proxies(metadata *constant.Metadata, touch bool) []constant.Proxy {
 	proxies := r.rawProxies(touch)
 
 	for n, proxy := range proxies {
@@ -104,7 +104,7 @@ func NewRelay(option *GroupCommonOption, providers []provider.ProxyProvider) *Re
 	return &Relay{
 		Base: outbound.NewBase(outbound.BaseOption{
 			Name:        option.Name,
-			Type:        C.Relay,
+			Type:        constant.Relay,
 			Interface:   option.Interface,
 			RoutingMark: option.RoutingMark,
 		}),

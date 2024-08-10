@@ -3,7 +3,7 @@ package http
 import (
 	"bufio"
 	"net/http"
-	_ "unsafe"
+	_ "unsafe" // ...
 )
 
 //go:linkname ReadRequest net/http.readRequest

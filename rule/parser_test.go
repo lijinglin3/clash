@@ -1,11 +1,11 @@
-package rules
+package rule
 
 import (
 	"errors"
 	"fmt"
 	"testing"
 
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
@@ -14,11 +14,11 @@ import (
 
 func TestParseRule(t *testing.T) {
 	type testCase struct {
-		tp            C.RuleConfig
+		tp            constant.RuleConfig
 		payload       string
 		target        string
 		params        []string
-		expectedRule  C.Rule
+		expectedRule  constant.Rule
 		expectedError error
 	}
 
@@ -26,126 +26,126 @@ func TestParseRule(t *testing.T) {
 
 	testCases := []testCase{
 		{
-			tp:           C.RuleConfigDomain,
+			tp:           constant.RuleConfigDomain,
 			payload:      "example.com",
 			target:       policy,
 			expectedRule: NewDomain("example.com", policy),
 		},
 		{
-			tp:           C.RuleConfigDomainSuffix,
+			tp:           constant.RuleConfigDomainSuffix,
 			payload:      "example.com",
 			target:       policy,
 			expectedRule: NewDomainSuffix("example.com", policy),
 		},
 		{
-			tp:           C.RuleConfigDomainKeyword,
+			tp:           constant.RuleConfigDomainKeyword,
 			payload:      "example.com",
 			target:       policy,
 			expectedRule: NewDomainKeyword("example.com", policy),
 		},
 		{
-			tp:      C.RuleConfigGeoIP,
+			tp:      constant.RuleConfigGeoIP,
 			payload: "CN",
 			target:  policy, params: []string{noResolve},
 			expectedRule: NewGEOIP("CN", policy, true),
 		},
 		{
-			tp:           C.RuleConfigIPCIDR,
+			tp:           constant.RuleConfigIPCIDR,
 			payload:      "127.0.0.0/8",
 			target:       policy,
 			expectedRule: lo.Must(NewIPCIDR("127.0.0.0/8", policy, WithIPCIDRNoResolve(false))),
 		},
 		{
-			tp:      C.RuleConfigIPCIDR,
+			tp:      constant.RuleConfigIPCIDR,
 			payload: "127.0.0.0/8",
 			target:  policy, params: []string{noResolve},
 			expectedRule: lo.Must(NewIPCIDR("127.0.0.0/8", policy, WithIPCIDRNoResolve(true))),
 		},
 		{
-			tp:           C.RuleConfigIPCIDR6,
+			tp:           constant.RuleConfigIPCIDR6,
 			payload:      "2001:db8::/32",
 			target:       policy,
 			expectedRule: lo.Must(NewIPCIDR("2001:db8::/32", policy, WithIPCIDRNoResolve(false))),
 		},
 		{
-			tp:      C.RuleConfigIPCIDR6,
+			tp:      constant.RuleConfigIPCIDR6,
 			payload: "2001:db8::/32",
 			target:  policy, params: []string{noResolve},
 			expectedRule: lo.Must(NewIPCIDR("2001:db8::/32", policy, WithIPCIDRNoResolve(true))),
 		},
 		{
-			tp:           C.RuleConfigSrcIPCIDR,
+			tp:           constant.RuleConfigSrcIPCIDR,
 			payload:      "192.168.1.201/32",
 			target:       policy,
 			expectedRule: lo.Must(NewIPCIDR("192.168.1.201/32", policy, WithIPCIDRSourceIP(true), WithIPCIDRNoResolve(true))),
 		},
 		{
-			tp:           C.RuleConfigSrcPort,
+			tp:           constant.RuleConfigSrcPort,
 			payload:      "80",
 			target:       policy,
 			expectedRule: lo.Must(NewPort("80", policy, PortTypeSrc)),
 		},
 		{
-			tp:           C.RuleConfigDstPort,
+			tp:           constant.RuleConfigDstPort,
 			payload:      "80",
 			target:       policy,
 			expectedRule: lo.Must(NewPort("80", policy, PortTypeDest)),
 		},
 		{
-			tp:           C.RuleConfigInboundPort,
+			tp:           constant.RuleConfigInboundPort,
 			payload:      "80",
 			target:       policy,
 			expectedRule: lo.Must(NewPort("80", policy, PortTypeInbound)),
 		},
 		{
-			tp:           C.RuleConfigProcessName,
+			tp:           constant.RuleConfigProcessName,
 			payload:      "example.exe",
 			target:       policy,
 			expectedRule: lo.Must(NewProcess("example.exe", policy, true)),
 		},
 		{
-			tp:           C.RuleConfigProcessPath,
+			tp:           constant.RuleConfigProcessPath,
 			payload:      "C:\\Program Files\\example.exe",
 			target:       policy,
 			expectedRule: lo.Must(NewProcess("C:\\Program Files\\example.exe", policy, false)),
 		},
 		{
-			tp:           C.RuleConfigProcessPath,
+			tp:           constant.RuleConfigProcessPath,
 			payload:      "/opt/example/example",
 			target:       policy,
 			expectedRule: lo.Must(NewProcess("/opt/example/example", policy, false)),
 		},
 		{
-			tp:      C.RuleConfigIPSet,
+			tp:      constant.RuleConfigIPSet,
 			payload: "example",
 			target:  policy,
 			// unit test runs on Linux machine and NewIPSet(...) won't be available
 			expectedError: errors.New("operation not permitted"),
 		},
 		{
-			tp:      C.RuleConfigIPSet,
+			tp:      constant.RuleConfigIPSet,
 			payload: "example",
 			target:  policy, params: []string{noResolve},
 			// unit test runs on Linux machine and NewIPSet(...) won't be available
 			expectedError: errors.New("operation not permitted"),
 		},
 		{
-			tp:           C.RuleConfigMatch,
+			tp:           constant.RuleConfigMatch,
 			payload:      "example",
 			target:       policy,
 			expectedRule: NewMatch(policy),
 		},
 		{
-			tp:            C.RuleConfigRuleSet,
+			tp:            constant.RuleConfigRuleSet,
 			payload:       "example",
 			target:        policy,
-			expectedError: fmt.Errorf("unsupported rule type %s", C.RuleConfigRuleSet),
+			expectedError: fmt.Errorf("unsupported rule type %s", constant.RuleConfigRuleSet),
 		},
 		{
-			tp:            C.RuleConfigScript,
+			tp:            constant.RuleConfigScript,
 			payload:       "example",
 			target:        policy,
-			expectedError: fmt.Errorf("unsupported rule type %s", C.RuleConfigScript),
+			expectedError: fmt.Errorf("unsupported rule type %s", constant.RuleConfigScript),
 		},
 		{
 			tp:            "UNKNOWN",

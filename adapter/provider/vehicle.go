@@ -10,15 +10,15 @@ import (
 	"time"
 
 	"github.com/lijinglin3/clash/component/dialer"
-	types "github.com/lijinglin3/clash/constant/provider"
+	"github.com/lijinglin3/clash/constant/provider"
 )
 
 type FileVehicle struct {
 	path string
 }
 
-func (f *FileVehicle) Type() types.VehicleType {
-	return types.File
+func (f *FileVehicle) Type() provider.VehicleType {
+	return provider.File
 }
 
 func (f *FileVehicle) Path() string {
@@ -38,8 +38,8 @@ type HTTPVehicle struct {
 	path string
 }
 
-func (h *HTTPVehicle) Type() types.VehicleType {
-	return types.HTTP
+func (h *HTTPVehicle) Type() provider.VehicleType {
+	return provider.HTTP
 }
 
 func (h *HTTPVehicle) Path() string {
@@ -93,6 +93,6 @@ func (h *HTTPVehicle) Read() ([]byte, error) {
 	return buf, nil
 }
 
-func NewHTTPVehicle(url string, path string) *HTTPVehicle {
-	return &HTTPVehicle{url, path}
+func NewHTTPVehicle(u, p string) *HTTPVehicle {
+	return &HTTPVehicle{u, p}
 }

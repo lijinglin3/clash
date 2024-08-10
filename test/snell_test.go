@@ -5,11 +5,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/lijinglin3/clash/adapter/outbound"
+	"github.com/lijinglin3/clash/constant"
+
 	"github.com/docker/docker/api/types/container"
 	"github.com/stretchr/testify/require"
-
-	"github.com/lijinglin3/clash/adapter/outbound"
-	C "github.com/lijinglin3/clash/constant"
 )
 
 func TestClash_SnellObfsHTTP(t *testing.T) {
@@ -20,7 +20,7 @@ func TestClash_SnellObfsHTTP(t *testing.T) {
 	}
 	hostCfg := &container.HostConfig{
 		PortBindings: defaultPortBindings,
-		Binds:        []string{fmt.Sprintf("%s:/config.conf", C.Path.Resolve("snell-http.conf"))},
+		Binds:        []string{fmt.Sprintf("%s:/config.conf", constant.Path.Resolve("snell-http.conf"))},
 	}
 
 	id, err := startContainer(cfg, hostCfg, "snell-http")
@@ -53,7 +53,7 @@ func TestClash_SnellObfsTLS(t *testing.T) {
 	}
 	hostCfg := &container.HostConfig{
 		PortBindings: defaultPortBindings,
-		Binds:        []string{fmt.Sprintf("%s:/config.conf", C.Path.Resolve("snell-tls.conf"))},
+		Binds:        []string{fmt.Sprintf("%s:/config.conf", constant.Path.Resolve("snell-tls.conf"))},
 	}
 
 	id, err := startContainer(cfg, hostCfg, "snell-tls")
@@ -86,7 +86,7 @@ func TestClash_Snell(t *testing.T) {
 	}
 	hostCfg := &container.HostConfig{
 		PortBindings: defaultPortBindings,
-		Binds:        []string{fmt.Sprintf("%s:/config.conf", C.Path.Resolve("snell.conf"))},
+		Binds:        []string{fmt.Sprintf("%s:/config.conf", constant.Path.Resolve("snell.conf"))},
 	}
 
 	id, err := startContainer(cfg, hostCfg, "snell")
@@ -116,7 +116,7 @@ func TestClash_Snellv3(t *testing.T) {
 	}
 	hostCfg := &container.HostConfig{
 		PortBindings: defaultPortBindings,
-		Binds:        []string{fmt.Sprintf("%s:/config.conf", C.Path.Resolve("snell.conf"))},
+		Binds:        []string{fmt.Sprintf("%s:/config.conf", constant.Path.Resolve("snell.conf"))},
 	}
 
 	id, err := startContainer(cfg, hostCfg, "snell")
@@ -148,7 +148,7 @@ func Benchmark_Snell(b *testing.B) {
 	}
 	hostCfg := &container.HostConfig{
 		PortBindings: defaultPortBindings,
-		Binds:        []string{fmt.Sprintf("%s:/config.conf", C.Path.Resolve("snell-http.conf"))},
+		Binds:        []string{fmt.Sprintf("%s:/config.conf", constant.Path.Resolve("snell-http.conf"))},
 	}
 
 	id, err := startContainer(cfg, hostCfg, "snell-bench")

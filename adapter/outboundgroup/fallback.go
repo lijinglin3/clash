@@ -7,7 +7,7 @@ import (
 	"github.com/lijinglin3/clash/adapter/outbound"
 	"github.com/lijinglin3/clash/common/singledo"
 	"github.com/lijinglin3/clash/component/dialer"
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 	"github.com/lijinglin3/clash/constant/provider"
 )
 
@@ -23,8 +23,8 @@ func (f *Fallback) Now() string {
 	return proxy.Name()
 }
 
-// DialContext implements C.ProxyAdapter
-func (f *Fallback) DialContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (C.Conn, error) {
+// DialContext implements constant.ProxyAdapter
+func (f *Fallback) DialContext(ctx context.Context, metadata *constant.Metadata, opts ...dialer.Option) (constant.Conn, error) {
 	proxy := f.findAliveProxy(true)
 	c, err := proxy.DialContext(ctx, metadata, f.Base.DialOptions(opts...)...)
 	if err == nil {
@@ -33,8 +33,8 @@ func (f *Fallback) DialContext(ctx context.Context, metadata *C.Metadata, opts .
 	return c, err
 }
 
-// ListenPacketContext implements C.ProxyAdapter
-func (f *Fallback) ListenPacketContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (C.PacketConn, error) {
+// ListenPacketContext implements constant.ProxyAdapter
+func (f *Fallback) ListenPacketContext(ctx context.Context, metadata *constant.Metadata, opts ...dialer.Option) (constant.PacketConn, error) {
 	proxy := f.findAliveProxy(true)
 	pc, err := proxy.ListenPacketContext(ctx, metadata, f.Base.DialOptions(opts...)...)
 	if err == nil {
@@ -43,7 +43,7 @@ func (f *Fallback) ListenPacketContext(ctx context.Context, metadata *C.Metadata
 	return pc, err
 }
 
-// SupportUDP implements C.ProxyAdapter
+// SupportUDP implements constant.ProxyAdapter
 func (f *Fallback) SupportUDP() bool {
 	if f.disableUDP {
 		return false
@@ -53,7 +53,7 @@ func (f *Fallback) SupportUDP() bool {
 	return proxy.SupportUDP()
 }
 
-// MarshalJSON implements C.ProxyAdapter
+// MarshalJSON implements constant.ProxyAdapter
 func (f *Fallback) MarshalJSON() ([]byte, error) {
 	var all []string
 	for _, proxy := range f.proxies(false) {
@@ -66,21 +66,21 @@ func (f *Fallback) MarshalJSON() ([]byte, error) {
 	})
 }
 
-// Unwrap implements C.ProxyAdapter
-func (f *Fallback) Unwrap(metadata *C.Metadata) C.Proxy {
+// Unwrap implements constant.ProxyAdapter
+func (f *Fallback) Unwrap(metadata *constant.Metadata) constant.Proxy {
 	proxy := f.findAliveProxy(true)
 	return proxy
 }
 
-func (f *Fallback) proxies(touch bool) []C.Proxy {
-	elm, _, _ := f.single.Do(func() (any, error) {
+func (f *Fallback) proxies(touch bool) []constant.Proxy {
+	_, elm, _ := f.single.Do(func() (any, error) {
 		return getProvidersProxies(f.providers, touch), nil
 	})
 
-	return elm.([]C.Proxy)
+	return elm.([]constant.Proxy)
 }
 
-func (f *Fallback) findAliveProxy(touch bool) C.Proxy {
+func (f *Fallback) findAliveProxy(touch bool) constant.Proxy {
 	proxies := f.proxies(touch)
 	for _, proxy := range proxies {
 		if proxy.Alive() {
@@ -95,7 +95,7 @@ func NewFallback(option *GroupCommonOption, providers []provider.ProxyProvider) 
 	return &Fallback{
 		Base: outbound.NewBase(outbound.BaseOption{
 			Name:        option.Name,
-			Type:        C.Fallback,
+			Type:        constant.Fallback,
 			Interface:   option.Interface,
 			RoutingMark: option.RoutingMark,
 		}),

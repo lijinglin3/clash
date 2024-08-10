@@ -11,7 +11,7 @@ import (
 	_ "time/tzdata"
 
 	"github.com/lijinglin3/clash/config"
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 	"github.com/lijinglin3/clash/hub"
 	"github.com/lijinglin3/clash/hub/executor"
 	"github.com/lijinglin3/clash/log"
@@ -43,7 +43,7 @@ func init() {
 func main() {
 	maxprocs.Set(maxprocs.Logger(func(string, ...any) {}))
 	if version {
-		fmt.Printf("Clash %s %s %s with %s %s\n", C.Version, runtime.GOOS, runtime.GOARCH, runtime.Version(), C.BuildTime)
+		fmt.Printf("Clash %s %s %s with %s %s\n", constant.Version, runtime.GOOS, runtime.GOARCH, runtime.Version(), constant.BuildTime)
 		return
 	}
 
@@ -52,7 +52,7 @@ func main() {
 			currentDir, _ := os.Getwd()
 			homeDir = filepath.Join(currentDir, homeDir)
 		}
-		C.SetHomeDir(homeDir)
+		constant.SetHomeDir(homeDir)
 	}
 
 	if configFile != "" {
@@ -60,23 +60,23 @@ func main() {
 			currentDir, _ := os.Getwd()
 			configFile = filepath.Join(currentDir, configFile)
 		}
-		C.SetConfig(configFile)
+		constant.SetConfig(configFile)
 	} else {
-		configFile := filepath.Join(C.Path.HomeDir(), C.Path.Config())
-		C.SetConfig(configFile)
+		configFile := filepath.Join(constant.Path.HomeDir(), constant.Path.Config())
+		constant.SetConfig(configFile)
 	}
 
-	if err := config.Init(C.Path.HomeDir()); err != nil {
+	if err := config.Init(constant.Path.HomeDir()); err != nil {
 		log.Fatalln("Initial configuration directory error: %s", err.Error())
 	}
 
 	if testConfig {
 		if _, err := executor.Parse(); err != nil {
 			log.Errorln(err.Error())
-			fmt.Printf("configuration file %s test failed\n", C.Path.Config())
+			fmt.Printf("configuration file %s test failed\n", constant.Path.Config())
 			os.Exit(1)
 		}
-		fmt.Printf("configuration file %s test is successful\n", C.Path.Config())
+		fmt.Printf("configuration file %s test is successful\n", constant.Path.Config())
 		return
 	}
 
@@ -104,7 +104,7 @@ func main() {
 		case <-termSign:
 			return
 		case <-hupSign:
-			if cfg, err := executor.ParseWithPath(C.Path.Config()); err == nil {
+			if cfg, err := executor.ParseWithPath(constant.Path.Config()); err == nil {
 				executor.ApplyConfig(cfg, true)
 			} else {
 				log.Errorln("Parse config error: %s", err.Error())

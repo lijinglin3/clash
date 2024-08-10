@@ -9,7 +9,7 @@ import (
 	"strconv"
 
 	"github.com/lijinglin3/clash/component/dialer"
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 	"github.com/lijinglin3/clash/transport/gun"
 	"github.com/lijinglin3/clash/transport/trojan"
 
@@ -69,8 +69,8 @@ func (t *Trojan) plainStream(c net.Conn) (net.Conn, error) {
 	return t.instance.StreamConn(c)
 }
 
-// StreamConn implements C.ProxyAdapter
-func (t *Trojan) StreamConn(c net.Conn, metadata *C.Metadata) (net.Conn, error) {
+// StreamConn implements constant.ProxyAdapter
+func (t *Trojan) StreamConn(c net.Conn, metadata *constant.Metadata) (net.Conn, error) {
 	var err error
 	if t.transport != nil {
 		c, err = gun.StreamGunWithConn(c, t.gunTLSConfig, t.gunConfig)
@@ -86,8 +86,8 @@ func (t *Trojan) StreamConn(c net.Conn, metadata *C.Metadata) (net.Conn, error) 
 	return c, err
 }
 
-// DialContext implements C.ProxyAdapter
-func (t *Trojan) DialContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (_ C.Conn, err error) {
+// DialContext implements constant.ProxyAdapter
+func (t *Trojan) DialContext(ctx context.Context, metadata *constant.Metadata, opts ...dialer.Option) (_ constant.Conn, err error) {
 	// gun transport
 	if t.transport != nil && len(opts) == 0 {
 		c, err := gun.StreamGunWithTransport(t.transport, t.gunConfig)
@@ -121,8 +121,8 @@ func (t *Trojan) DialContext(ctx context.Context, metadata *C.Metadata, opts ...
 	return NewConn(c, t), err
 }
 
-// ListenPacketContext implements C.ProxyAdapter
-func (t *Trojan) ListenPacketContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (_ C.PacketConn, err error) {
+// ListenPacketContext implements constant.ProxyAdapter
+func (t *Trojan) ListenPacketContext(ctx context.Context, metadata *constant.Metadata, opts ...dialer.Option) (_ constant.PacketConn, err error) {
 	var c net.Conn
 
 	// grpc transport
@@ -176,7 +176,7 @@ func NewTrojan(option TrojanOption) (*Trojan, error) {
 		Base: &Base{
 			name:  option.Name,
 			addr:  addr,
-			tp:    C.Trojan,
+			tp:    constant.Trojan,
 			udp:   option.UDP,
 			iface: option.Interface,
 			rmark: option.RoutingMark,

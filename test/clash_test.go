@@ -14,16 +14,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/docker/docker/api/types"
+	"github.com/lijinglin3/clash/adapter/outbound"
+	"github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/hub/executor"
+	"github.com/lijinglin3/clash/transport/socks5"
+
+	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"github.com/lijinglin3/clash/adapter/outbound"
-	C "github.com/lijinglin3/clash/constant"
-	"github.com/lijinglin3/clash/hub/executor"
-	"github.com/lijinglin3/clash/transport/socks5"
 )
 
 const (
@@ -60,7 +60,7 @@ func init() {
 		panic(err)
 	}
 	homeDir := filepath.Join(currentDir, "config")
-	C.SetHomeDir(homeDir)
+	constant.SetHomeDir(homeDir)
 
 	c, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
@@ -68,7 +68,7 @@ func init() {
 	}
 	defer c.Close()
 
-	list, err := c.ImageList(context.Background(), types.ImageListOptions{All: true})
+	list, err := c.ImageList(context.Background(), image.ListOptions{All: true})
 	if err != nil {
 		panic(err)
 	}
@@ -94,13 +94,13 @@ func init() {
 		ImageXray,
 	}
 
-	for _, image := range images {
-		if imageExist(image) {
+	for _, i := range images {
+		if imageExist(i) {
 			continue
 		}
 
-		println("pulling image:", image)
-		imageStream, err := c.ImagePull(context.Background(), image, types.ImagePullOptions{})
+		println("pulling image:", i)
+		imageStream, err := c.ImagePull(context.Background(), i, image.PullOptions{})
 		if err != nil {
 			panic(err)
 		}
@@ -543,8 +543,8 @@ func testPacketConnTimeout(t *testing.T, pc net.PacketConn) error {
 	}
 }
 
-func testSuit(t *testing.T, proxy C.ProxyAdapter) {
-	conn, err := proxy.DialContext(context.Background(), &C.Metadata{
+func testSuit(t *testing.T, proxy constant.ProxyAdapter) {
+	conn, err := proxy.DialContext(context.Background(), &constant.Metadata{
 		Host:    localIP.String(),
 		DstPort: 10001,
 	})
@@ -552,7 +552,7 @@ func testSuit(t *testing.T, proxy C.ProxyAdapter) {
 	defer conn.Close()
 	assert.NoError(t, testPingPongWithConn(t, conn))
 
-	conn, err = proxy.DialContext(context.Background(), &C.Metadata{
+	conn, err = proxy.DialContext(context.Background(), &constant.Metadata{
 		Host:    localIP.String(),
 		DstPort: 10001,
 	})
@@ -564,8 +564,8 @@ func testSuit(t *testing.T, proxy C.ProxyAdapter) {
 		return
 	}
 
-	pc, err := proxy.ListenPacketContext(context.Background(), &C.Metadata{
-		NetWork: C.UDP,
+	pc, err := proxy.ListenPacketContext(context.Background(), &constant.Metadata{
+		NetWork: constant.UDP,
 		DstIP:   localIP.AsSlice(),
 		DstPort: 10001,
 	})
@@ -574,8 +574,8 @@ func testSuit(t *testing.T, proxy C.ProxyAdapter) {
 
 	assert.NoError(t, testPingPongWithPacketConn(t, pc))
 
-	pc, err = proxy.ListenPacketContext(context.Background(), &C.Metadata{
-		NetWork: C.UDP,
+	pc, err = proxy.ListenPacketContext(context.Background(), &constant.Metadata{
+		NetWork: constant.UDP,
 		DstIP:   localIP.AsSlice(),
 		DstPort: 10001,
 	})
@@ -584,8 +584,8 @@ func testSuit(t *testing.T, proxy C.ProxyAdapter) {
 
 	assert.NoError(t, testLargeDataWithPacketConn(t, pc))
 
-	pc, err = proxy.ListenPacketContext(context.Background(), &C.Metadata{
-		NetWork: C.UDP,
+	pc, err = proxy.ListenPacketContext(context.Background(), &constant.Metadata{
+		NetWork: constant.UDP,
 		DstIP:   localIP.AsSlice(),
 		DstPort: 10001,
 	})
@@ -595,7 +595,7 @@ func testSuit(t *testing.T, proxy C.ProxyAdapter) {
 	assert.NoError(t, testPacketConnTimeout(t, pc))
 }
 
-func benchmarkProxy(b *testing.B, proxy C.ProxyAdapter) {
+func benchmarkProxy(b *testing.B, proxy constant.ProxyAdapter) {
 	l, err := Listen("tcp", ":10001")
 	require.NoError(b, err)
 	defer l.Close()
@@ -622,7 +622,7 @@ func benchmarkProxy(b *testing.B, proxy C.ProxyAdapter) {
 		io.Copy(io.Discard, c)
 	}()
 
-	conn, err := proxy.DialContext(context.Background(), &C.Metadata{
+	conn, err := proxy.DialContext(context.Background(), &constant.Metadata{
 		Host:    localIP.String(),
 		DstPort: 10001,
 	})

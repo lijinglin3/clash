@@ -8,9 +8,9 @@ import (
 	"syscall"
 	"unsafe"
 
-	"github.com/lijinglin3/clash/transport/socks5"
-
 	"golang.org/x/sys/unix"
+
+	"github.com/lijinglin3/clash/transport/socks5"
 )
 
 const (

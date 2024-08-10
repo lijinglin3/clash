@@ -13,14 +13,14 @@ import (
 	"github.com/lijinglin3/clash/common/picker"
 	"github.com/lijinglin3/clash/log"
 
-	D "github.com/miekg/dns"
+	"github.com/miekg/dns"
 	"github.com/samber/lo"
 )
 
 const serverFailureCacheTTL uint32 = 5
 
-func minimalTTL(records []D.RR) uint32 {
-	rr := lo.MinBy(records, func(r1 D.RR, r2 D.RR) bool {
+func minimalTTL(records []dns.RR) uint32 {
+	rr := lo.MinBy(records, func(r1, r2 dns.RR) bool {
 		return r1.Header().Ttl < r2.Header().Ttl
 	})
 	if rr == nil {
@@ -29,7 +29,7 @@ func minimalTTL(records []D.RR) uint32 {
 	return rr.Header().Ttl
 }
 
-func updateTTL(records []D.RR, ttl uint32) {
+func updateTTL(records []dns.RR, ttl uint32) {
 	if len(records) == 0 {
 		return
 	}
@@ -39,15 +39,15 @@ func updateTTL(records []D.RR, ttl uint32) {
 	}
 }
 
-func putMsgToCache(c *cache.LruCache, key string, q D.Question, msg *D.Msg) {
+func putMsgToCache(c *cache.LruCache, key string, q dns.Question, msg *dns.Msg) {
 	// skip dns cache for acme challenge
-	if q.Qtype == D.TypeTXT && strings.HasPrefix(q.Name, "_acme-challenge.") {
+	if q.Qtype == dns.TypeTXT && strings.HasPrefix(q.Name, "_acme-challenge.") {
 		log.Debugln("[DNS] dns cache ignored because of acme challenge for: %s", q.Name)
 		return
 	}
 
 	var ttl uint32
-	if msg.Rcode == D.RcodeServerFailure {
+	if msg.Rcode == dns.RcodeServerFailure {
 		// [...] a resolver MAY cache a server failure response.
 		// If it does so it MUST NOT cache it for longer than five (5) minutes [...]
 		ttl = serverFailureCacheTTL
@@ -60,7 +60,7 @@ func putMsgToCache(c *cache.LruCache, key string, q D.Question, msg *D.Msg) {
 	c.SetWithExpire(key, msg.Copy(), time.Now().Add(time.Duration(ttl)*time.Second))
 }
 
-func setMsgTTL(msg *D.Msg, ttl uint32) {
+func setMsgTTL(msg *dns.Msg, ttl uint32) {
 	for _, answer := range msg.Answer {
 		answer.Header().Ttl = ttl
 	}
@@ -74,14 +74,14 @@ func setMsgTTL(msg *D.Msg, ttl uint32) {
 	}
 }
 
-func updateMsgTTL(msg *D.Msg, ttl uint32) {
+func updateMsgTTL(msg *dns.Msg, ttl uint32) {
 	updateTTL(msg.Answer, ttl)
 	updateTTL(msg.Ns, ttl)
 	updateTTL(msg.Extra, ttl)
 }
 
-func isIPRequest(q D.Question) bool {
-	return q.Qclass == D.ClassINET && (q.Qtype == D.TypeA || q.Qtype == D.TypeAAAA)
+func isIPRequest(q dns.Question) bool {
+	return q.Qclass == dns.ClassINET && (q.Qtype == dns.TypeA || q.Qtype == dns.TypeAAAA)
 }
 
 func transform(servers []NameServer, resolver *Resolver) []dnsClient {
@@ -98,7 +98,7 @@ func transform(servers []NameServer, resolver *Resolver) []dnsClient {
 
 		host, port, _ := net.SplitHostPort(s.Addr)
 		ret = append(ret, &client{
-			Client: &D.Client{
+			Client: &dns.Client{
 				Net: s.Net,
 				TLSConfig: &tls.Config{
 					ServerName: host,
@@ -115,25 +115,25 @@ func transform(servers []NameServer, resolver *Resolver) []dnsClient {
 	return ret
 }
 
-func handleMsgWithEmptyAnswer(r *D.Msg) *D.Msg {
-	msg := &D.Msg{}
-	msg.Answer = []D.RR{}
+func handleMsgWithEmptyAnswer(r *dns.Msg) *dns.Msg {
+	msg := &dns.Msg{}
+	msg.Answer = []dns.RR{}
 
-	msg.SetRcode(r, D.RcodeSuccess)
+	msg.SetRcode(r, dns.RcodeSuccess)
 	msg.Authoritative = true
 	msg.RecursionAvailable = true
 
 	return msg
 }
 
-func msgToIP(msg *D.Msg) []net.IP {
+func msgToIP(msg *dns.Msg) []net.IP {
 	ips := []net.IP{}
 
 	for _, answer := range msg.Answer {
 		switch ans := answer.(type) {
-		case *D.AAAA:
+		case *dns.AAAA:
 			ips = append(ips, ans.AAAA)
-		case *D.A:
+		case *dns.A:
 			ips = append(ips, ans.A)
 		}
 	}
@@ -141,7 +141,7 @@ func msgToIP(msg *D.Msg) []net.IP {
 	return ips
 }
 
-func batchExchange(ctx context.Context, clients []dnsClient, m *D.Msg) (msg *D.Msg, err error) {
+func batchExchange(ctx context.Context, clients []dnsClient, m *dns.Msg) (msg *dns.Msg, err error) {
 	fast, ctx := picker.WithContext(ctx)
 	for _, client := range clients {
 		r := client
@@ -149,7 +149,7 @@ func batchExchange(ctx context.Context, clients []dnsClient, m *D.Msg) (msg *D.M
 			m, err := r.ExchangeContext(ctx, m)
 			if err != nil {
 				return nil, err
-			} else if m.Rcode == D.RcodeServerFailure || m.Rcode == D.RcodeRefused {
+			} else if m.Rcode == dns.RcodeServerFailure || m.Rcode == dns.RcodeRefused {
 				return nil, errors.New("server failure")
 			}
 			return m, nil
@@ -165,6 +165,6 @@ func batchExchange(ctx context.Context, clients []dnsClient, m *D.Msg) (msg *D.M
 		return nil, err
 	}
 
-	msg = elm.(*D.Msg)
+	msg = elm.(*dns.Msg)
 	return
 }

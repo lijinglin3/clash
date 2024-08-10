@@ -320,7 +320,6 @@ func SplitAddr(b []byte) Addr {
 		addrLen = 1 + net.IPv6len + 2
 	default:
 		return nil
-
 	}
 
 	if len(b) < addrLen {

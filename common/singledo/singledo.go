@@ -25,18 +25,18 @@ type Result struct {
 }
 
 // Do single.Do likes sync.singleFlight
-func (s *Single) Do(fn func() (any, error)) (v any, err error, shared bool) {
+func (s *Single) Do(fn func() (any, error)) (shared bool, v any, err error) {
 	s.mux.Lock()
 	now := time.Now()
 	if now.Before(s.last.Add(s.wait)) {
 		s.mux.Unlock()
-		return s.result.Val, s.result.Err, true
+		return true, s.result.Val, s.result.Err
 	}
 
 	if call := s.call; call != nil {
 		s.mux.Unlock()
 		call.wg.Wait()
-		return call.val, call.err, true
+		return true, call.val, call.err
 	}
 
 	call := &call{}
@@ -51,7 +51,7 @@ func (s *Single) Do(fn func() (any, error)) (v any, err error, shared bool) {
 	s.result = &Result{call.val, call.err}
 	s.last = now
 	s.mux.Unlock()
-	return call.val, call.err, false
+	return false, call.val, call.err
 }
 
 func (s *Single) Reset() {

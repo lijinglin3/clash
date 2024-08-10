@@ -7,7 +7,7 @@ import (
 	"strconv"
 
 	"github.com/lijinglin3/clash/component/dialer"
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 	"github.com/lijinglin3/clash/transport/shadowsocks/core"
 	"github.com/lijinglin3/clash/transport/shadowsocks/shadowaead"
 	"github.com/lijinglin3/clash/transport/shadowsocks/shadowstream"
@@ -36,8 +36,8 @@ type ShadowSocksROption struct {
 	UDP           bool   `proxy:"udp,omitempty"`
 }
 
-// StreamConn implements C.ProxyAdapter
-func (ssr *ShadowSocksR) StreamConn(c net.Conn, metadata *C.Metadata) (net.Conn, error) {
+// StreamConn implements constant.ProxyAdapter
+func (ssr *ShadowSocksR) StreamConn(c net.Conn, metadata *constant.Metadata) (net.Conn, error) {
 	c = ssr.obfs.StreamConn(c)
 	c = ssr.cipher.StreamConn(c)
 	var (
@@ -58,8 +58,8 @@ func (ssr *ShadowSocksR) StreamConn(c net.Conn, metadata *C.Metadata) (net.Conn,
 	return c, err
 }
 
-// DialContext implements C.ProxyAdapter
-func (ssr *ShadowSocksR) DialContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (_ C.Conn, err error) {
+// DialContext implements constant.ProxyAdapter
+func (ssr *ShadowSocksR) DialContext(ctx context.Context, metadata *constant.Metadata, opts ...dialer.Option) (_ constant.Conn, err error) {
 	c, err := dialer.DialContext(ctx, "tcp", ssr.addr, ssr.Base.DialOptions(opts...)...)
 	if err != nil {
 		return nil, fmt.Errorf("%s connect error: %w", ssr.addr, err)
@@ -74,8 +74,8 @@ func (ssr *ShadowSocksR) DialContext(ctx context.Context, metadata *C.Metadata, 
 	return NewConn(c, ssr), err
 }
 
-// ListenPacketContext implements C.ProxyAdapter
-func (ssr *ShadowSocksR) ListenPacketContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (C.PacketConn, error) {
+// ListenPacketContext implements constant.ProxyAdapter
+func (ssr *ShadowSocksR) ListenPacketContext(ctx context.Context, metadata *constant.Metadata, opts ...dialer.Option) (constant.PacketConn, error) {
 	pc, err := dialer.ListenPacket(ctx, "udp", "", ssr.Base.DialOptions(opts...)...)
 	if err != nil {
 		return nil, err
@@ -147,7 +147,7 @@ func NewShadowSocksR(option ShadowSocksROption) (*ShadowSocksR, error) {
 		Base: &Base{
 			name:  option.Name,
 			addr:  addr,
-			tp:    C.ShadowsocksR,
+			tp:    constant.ShadowsocksR,
 			udp:   option.UDP,
 			iface: option.Interface,
 			rmark: option.RoutingMark,

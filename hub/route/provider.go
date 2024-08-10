@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 	"github.com/lijinglin3/clash/constant/provider"
 	"github.com/lijinglin3/clash/tunnel"
 
@@ -95,7 +95,7 @@ func findProviderProxyByName(next http.Handler) http.Handler {
 			name = r.Context().Value(CtxKeyProxyName).(string)
 			pd   = r.Context().Value(CtxKeyProvider).(provider.ProxyProvider)
 		)
-		proxy, exist := lo.Find(pd.Proxies(), func(proxy C.Proxy) bool {
+		proxy, exist := lo.Find(pd.Proxies(), func(proxy constant.Proxy) bool {
 			return proxy.Name() == name
 		})
 

@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/lijinglin3/clash/adapter/inbound"
-	N "github.com/lijinglin3/clash/common/net"
-	C "github.com/lijinglin3/clash/constant"
+	cnet "github.com/lijinglin3/clash/common/net"
+	"github.com/lijinglin3/clash/constant"
 	"github.com/lijinglin3/clash/transport/socks5"
 )
 
@@ -23,7 +23,7 @@ func isUpgradeRequest(req *http.Request) bool {
 	return false
 }
 
-func handleUpgrade(conn net.Conn, request *http.Request, in chan<- C.ConnContext) {
+func handleUpgrade(conn net.Conn, request *http.Request, in chan<- constant.ConnContext) {
 	defer conn.Close()
 
 	removeProxyHeaders(request.Header)
@@ -43,7 +43,7 @@ func handleUpgrade(conn net.Conn, request *http.Request, in chan<- C.ConnContext
 
 	in <- inbound.NewHTTP(dstAddr, conn.RemoteAddr(), conn.LocalAddr(), right)
 
-	bufferedLeft := N.NewBufferedConn(left)
+	bufferedLeft := cnet.NewBufferedConn(left)
 	defer bufferedLeft.Close()
 
 	err := request.Write(bufferedLeft)
@@ -64,6 +64,6 @@ func handleUpgrade(conn net.Conn, request *http.Request, in chan<- C.ConnContext
 	}
 
 	if resp.StatusCode == http.StatusSwitchingProtocols {
-		N.Relay(bufferedLeft, conn)
+		cnet.Relay(bufferedLeft, conn)
 	}
 }

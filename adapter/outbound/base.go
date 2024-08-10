@@ -7,57 +7,57 @@ import (
 	"net"
 
 	"github.com/lijinglin3/clash/component/dialer"
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 )
 
 type Base struct {
 	name  string
 	addr  string
 	iface string
-	tp    C.AdapterType
+	tp    constant.AdapterType
 	udp   bool
 	rmark int
 }
 
-// Name implements C.ProxyAdapter
+// Name implements constant.ProxyAdapter
 func (b *Base) Name() string {
 	return b.name
 }
 
-// Type implements C.ProxyAdapter
-func (b *Base) Type() C.AdapterType {
+// Type implements constant.ProxyAdapter
+func (b *Base) Type() constant.AdapterType {
 	return b.tp
 }
 
-// StreamConn implements C.ProxyAdapter
-func (b *Base) StreamConn(c net.Conn, metadata *C.Metadata) (net.Conn, error) {
+// StreamConn implements constant.ProxyAdapter
+func (b *Base) StreamConn(c net.Conn, metadata *constant.Metadata) (net.Conn, error) {
 	return c, errors.New("no support")
 }
 
-// ListenPacketContext implements C.ProxyAdapter
-func (b *Base) ListenPacketContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (C.PacketConn, error) {
+// ListenPacketContext implements constant.ProxyAdapter
+func (b *Base) ListenPacketContext(ctx context.Context, metadata *constant.Metadata, opts ...dialer.Option) (constant.PacketConn, error) {
 	return nil, errors.New("no support")
 }
 
-// SupportUDP implements C.ProxyAdapter
+// SupportUDP implements constant.ProxyAdapter
 func (b *Base) SupportUDP() bool {
 	return b.udp
 }
 
-// MarshalJSON implements C.ProxyAdapter
+// MarshalJSON implements constant.ProxyAdapter
 func (b *Base) MarshalJSON() ([]byte, error) {
 	return json.Marshal(map[string]string{
 		"type": b.Type().String(),
 	})
 }
 
-// Addr implements C.ProxyAdapter
+// Addr implements constant.ProxyAdapter
 func (b *Base) Addr() string {
 	return b.addr
 }
 
-// Unwrap implements C.ProxyAdapter
-func (b *Base) Unwrap(metadata *C.Metadata) C.Proxy {
+// Unwrap implements constant.ProxyAdapter
+func (b *Base) Unwrap(metadata *constant.Metadata) constant.Proxy {
 	return nil
 }
 
@@ -75,14 +75,14 @@ func (b *Base) DialOptions(opts ...dialer.Option) []dialer.Option {
 }
 
 type BasicOption struct {
-	Interface   string `proxy:"interface-name,omitempty" group:"interface-name,omitempty"`
-	RoutingMark int    `proxy:"routing-mark,omitempty" group:"routing-mark,omitempty"`
+	Interface   string `group:"interface-name,omitempty" proxy:"interface-name,omitempty"`
+	RoutingMark int    `group:"routing-mark,omitempty"   proxy:"routing-mark,omitempty"`
 }
 
 type BaseOption struct {
 	Name        string
 	Addr        string
-	Type        C.AdapterType
+	Type        constant.AdapterType
 	UDP         bool
 	Interface   string
 	RoutingMark int
@@ -101,38 +101,38 @@ func NewBase(opt BaseOption) *Base {
 
 type conn struct {
 	net.Conn
-	chain C.Chain
+	chain constant.Chain
 }
 
-// Chains implements C.Connection
-func (c *conn) Chains() C.Chain {
+// Chains implements constant.Connection
+func (c *conn) Chains() constant.Chain {
 	return c.chain
 }
 
-// AppendToChains implements C.Connection
-func (c *conn) AppendToChains(a C.ProxyAdapter) {
+// AppendToChains implements constant.Connection
+func (c *conn) AppendToChains(a constant.ProxyAdapter) {
 	c.chain = append(c.chain, a.Name())
 }
 
-func NewConn(c net.Conn, a C.ProxyAdapter) C.Conn {
+func NewConn(c net.Conn, a constant.ProxyAdapter) constant.Conn {
 	return &conn{c, []string{a.Name()}}
 }
 
 type packetConn struct {
 	net.PacketConn
-	chain C.Chain
+	chain constant.Chain
 }
 
-// Chains implements C.Connection
-func (c *packetConn) Chains() C.Chain {
+// Chains implements constant.Connection
+func (c *packetConn) Chains() constant.Chain {
 	return c.chain
 }
 
-// AppendToChains implements C.Connection
-func (c *packetConn) AppendToChains(a C.ProxyAdapter) {
+// AppendToChains implements constant.Connection
+func (c *packetConn) AppendToChains(a constant.ProxyAdapter) {
 	c.chain = append(c.chain, a.Name())
 }
 
-func newPacketConn(pc net.PacketConn, a C.ProxyAdapter) C.PacketConn {
+func newPacketConn(pc net.PacketConn, a constant.ProxyAdapter) constant.PacketConn {
 	return &packetConn{pc, []string{a.Name()}}
 }

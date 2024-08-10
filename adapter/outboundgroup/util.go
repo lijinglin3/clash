@@ -6,10 +6,10 @@ import (
 	"strconv"
 	"time"
 
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 )
 
-func addrToMetadata(rawAddress string) (addr *C.Metadata, err error) {
+func addrToMetadata(rawAddress string) (addr *constant.Metadata, err error) {
 	host, port, err := net.SplitHostPort(rawAddress)
 	if err != nil {
 		err = fmt.Errorf("addrToMetadata failed: %w", err)
@@ -19,25 +19,25 @@ func addrToMetadata(rawAddress string) (addr *C.Metadata, err error) {
 	ip := net.ParseIP(host)
 	p, _ := strconv.ParseUint(port, 10, 16)
 	if ip == nil {
-		addr = &C.Metadata{
+		addr = &constant.Metadata{
 			Host:    host,
 			DstIP:   nil,
-			DstPort: C.Port(p),
+			DstPort: constant.Port(p),
 		}
 		return
 	} else if ip4 := ip.To4(); ip4 != nil {
-		addr = &C.Metadata{
+		addr = &constant.Metadata{
 			Host:    "",
 			DstIP:   ip4,
-			DstPort: C.Port(p),
+			DstPort: constant.Port(p),
 		}
 		return
 	}
 
-	addr = &C.Metadata{
+	addr = &constant.Metadata{
 		Host:    "",
 		DstIP:   ip,
-		DstPort: C.Port(p),
+		DstPort: constant.Port(p),
 	}
 	return
 }

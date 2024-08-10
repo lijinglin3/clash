@@ -50,7 +50,7 @@ func (m *Manager) PushDownloaded(size int64) {
 	m.downloadTotal.Add(size)
 }
 
-func (m *Manager) Now() (up int64, down int64) {
+func (m *Manager) Now() (up, down int64) {
 	return m.uploadBlip.Load(), m.downloadBlip.Load()
 }
 

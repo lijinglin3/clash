@@ -1,9 +1,9 @@
-package rules
+package rule
 
 import (
 	"net"
 
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 )
 
 type IPCIDROption func(*IPCIDR)
@@ -20,8 +20,8 @@ func WithIPCIDRNoResolve(noResolve bool) IPCIDROption {
 	}
 }
 
-// Implements C.Rule
-var _ C.Rule = (*IPCIDR)(nil)
+// Implements constant.Rule
+var _ constant.Rule = (*IPCIDR)(nil)
 
 type IPCIDR struct {
 	ipnet       *net.IPNet
@@ -30,14 +30,14 @@ type IPCIDR struct {
 	noResolveIP bool
 }
 
-func (i *IPCIDR) RuleType() C.RuleType {
+func (i *IPCIDR) RuleType() constant.RuleType {
 	if i.isSourceIP {
-		return C.SrcIPCIDR
+		return constant.SrcIPCIDR
 	}
-	return C.IPCIDR
+	return constant.IPCIDR
 }
 
-func (i *IPCIDR) Match(metadata *C.Metadata) bool {
+func (i *IPCIDR) Match(metadata *constant.Metadata) bool {
 	ip := metadata.DstIP
 	if i.isSourceIP {
 		ip = metadata.SrcIP
@@ -61,7 +61,7 @@ func (i *IPCIDR) ShouldFindProcess() bool {
 	return false
 }
 
-func NewIPCIDR(s string, adapter string, opts ...IPCIDROption) (*IPCIDR, error) {
+func NewIPCIDR(s, adapter string, opts ...IPCIDROption) (*IPCIDR, error) {
 	_, ipnet, err := net.ParseCIDR(s)
 	if err != nil {
 		return nil, errPayload

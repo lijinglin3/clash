@@ -13,7 +13,9 @@ import (
 const (
 	TCP NetWork = iota
 	UDP
+)
 
+const (
 	HTTP Type = iota
 	HTTPCONNECT
 	SOCKS4
@@ -106,9 +108,9 @@ func (m *Metadata) Resolved() bool {
 // when dialing proxy connection in DNSMapping mode.
 func (m *Metadata) Pure() *Metadata {
 	if m.DNSMode == DNSMapping && m.DstIP != nil {
-		copy := *m
-		copy.Host = ""
-		return &copy
+		metadata := *m
+		metadata.Host = ""
+		return &metadata
 	}
 
 	return m
@@ -129,9 +131,8 @@ func (m *Metadata) String() string {
 		return m.Host
 	} else if m.DstIP != nil {
 		return m.DstIP.String()
-	} else {
-		return "<nil>"
 	}
+	return "<nil>"
 }
 
 func (m *Metadata) Valid() bool {

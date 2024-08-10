@@ -5,8 +5,8 @@ import (
 	"errors"
 )
 
-// LogLevelMapping is a mapping for LogLevel enum
-var LogLevelMapping = map[string]LogLevel{
+// LevelMapping is a mapping for Level enum
+var LevelMapping = map[string]Level{
 	ERROR.String():   ERROR,
 	WARNING.String(): WARNING,
 	INFO.String():    INFO,
@@ -15,20 +15,20 @@ var LogLevelMapping = map[string]LogLevel{
 }
 
 const (
-	DEBUG LogLevel = iota
+	DEBUG Level = iota
 	INFO
 	WARNING
 	ERROR
 	SILENT
 )
 
-type LogLevel int
+type Level int
 
-// UnmarshalYAML unserialize LogLevel with yaml
-func (l *LogLevel) UnmarshalYAML(unmarshal func(any) error) error {
+// UnmarshalYAML unserialize Level with yaml
+func (l *Level) UnmarshalYAML(unmarshal func(any) error) error {
 	var tp string
 	unmarshal(&tp)
-	level, exist := LogLevelMapping[tp]
+	level, exist := LevelMapping[tp]
 	if !exist {
 		return errors.New("invalid mode")
 	}
@@ -36,11 +36,11 @@ func (l *LogLevel) UnmarshalYAML(unmarshal func(any) error) error {
 	return nil
 }
 
-// UnmarshalJSON unserialize LogLevel with json
-func (l *LogLevel) UnmarshalJSON(data []byte) error {
+// UnmarshalJSON unserialize Level with json
+func (l *Level) UnmarshalJSON(data []byte) error {
 	var tp string
 	json.Unmarshal(data, &tp)
-	level, exist := LogLevelMapping[tp]
+	level, exist := LevelMapping[tp]
 	if !exist {
 		return errors.New("invalid mode")
 	}
@@ -48,17 +48,17 @@ func (l *LogLevel) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// MarshalJSON serialize LogLevel with json
-func (l LogLevel) MarshalJSON() ([]byte, error) {
+// MarshalJSON serialize Level with json
+func (l Level) MarshalJSON() ([]byte, error) {
 	return json.Marshal(l.String())
 }
 
-// MarshalYAML serialize LogLevel with yaml
-func (l LogLevel) MarshalYAML() (any, error) {
+// MarshalYAML serialize Level with yaml
+func (l Level) MarshalYAML() (any, error) {
 	return l.String(), nil
 }
 
-func (l LogLevel) String() string {
+func (l Level) String() string {
 	switch l {
 	case INFO:
 		return "info"

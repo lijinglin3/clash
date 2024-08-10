@@ -5,10 +5,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/lijinglin3/clash/adapter/outbound"
+
 	"github.com/docker/docker/api/types/container"
 	"github.com/stretchr/testify/require"
-
-	"github.com/lijinglin3/clash/adapter/outbound"
 )
 
 func TestClash_Shadowsocks(t *testing.T) {

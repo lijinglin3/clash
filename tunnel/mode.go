@@ -6,23 +6,23 @@ import (
 	"strings"
 )
 
-type TunnelMode int
+type Mode int
 
 // ModeMapping is a mapping for Mode enum
-var ModeMapping = map[string]TunnelMode{
+var ModeMapping = map[string]Mode{
 	Global.String(): Global,
 	Rule.String():   Rule,
 	Direct.String(): Direct,
 }
 
 const (
-	Global TunnelMode = iota
+	Global Mode = iota
 	Rule
 	Direct
 )
 
 // UnmarshalJSON unserialize Mode
-func (m *TunnelMode) UnmarshalJSON(data []byte) error {
+func (m *Mode) UnmarshalJSON(data []byte) error {
 	var tp string
 	json.Unmarshal(data, &tp)
 	mode, exist := ModeMapping[strings.ToLower(tp)]
@@ -34,7 +34,7 @@ func (m *TunnelMode) UnmarshalJSON(data []byte) error {
 }
 
 // UnmarshalYAML unserialize Mode with yaml
-func (m *TunnelMode) UnmarshalYAML(unmarshal func(any) error) error {
+func (m *Mode) UnmarshalYAML(unmarshal func(any) error) error {
 	var tp string
 	unmarshal(&tp)
 	mode, exist := ModeMapping[strings.ToLower(tp)]
@@ -46,16 +46,16 @@ func (m *TunnelMode) UnmarshalYAML(unmarshal func(any) error) error {
 }
 
 // MarshalJSON serialize Mode
-func (m TunnelMode) MarshalJSON() ([]byte, error) {
+func (m Mode) MarshalJSON() ([]byte, error) {
 	return json.Marshal(m.String())
 }
 
-// MarshalYAML serialize TunnelMode with yaml
-func (m TunnelMode) MarshalYAML() (any, error) {
+// MarshalYAML serialize Mode with yaml
+func (m Mode) MarshalYAML() (any, error) {
 	return m.String(), nil
 }
 
-func (m TunnelMode) String() string {
+func (m Mode) String() string {
 	switch m {
 	case Global:
 		return "global"

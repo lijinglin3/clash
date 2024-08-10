@@ -18,7 +18,7 @@ const (
 	ShadowsocksR
 	Snell
 	Socks5
-	Http
+	Http // nolint
 	Vless
 	Vmess
 	Trojan

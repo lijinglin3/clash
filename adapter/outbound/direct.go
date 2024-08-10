@@ -5,15 +5,15 @@ import (
 	"net"
 
 	"github.com/lijinglin3/clash/component/dialer"
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 )
 
 type Direct struct {
 	*Base
 }
 
-// DialContext implements C.ProxyAdapter
-func (d *Direct) DialContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (C.Conn, error) {
+// DialContext implements constant.ProxyAdapter
+func (d *Direct) DialContext(ctx context.Context, metadata *constant.Metadata, opts ...dialer.Option) (constant.Conn, error) {
 	c, err := dialer.DialContext(ctx, "tcp", metadata.RemoteAddress(), d.Base.DialOptions(opts...)...)
 	if err != nil {
 		return nil, err
@@ -22,8 +22,8 @@ func (d *Direct) DialContext(ctx context.Context, metadata *C.Metadata, opts ...
 	return NewConn(c, d), nil
 }
 
-// ListenPacketContext implements C.ProxyAdapter
-func (d *Direct) ListenPacketContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (C.PacketConn, error) {
+// ListenPacketContext implements constant.ProxyAdapter
+func (d *Direct) ListenPacketContext(ctx context.Context, metadata *constant.Metadata, opts ...dialer.Option) (constant.PacketConn, error) {
 	pc, err := dialer.ListenPacket(ctx, "udp", "", d.Base.DialOptions(opts...)...)
 	if err != nil {
 		return nil, err
@@ -39,7 +39,7 @@ func NewDirect() *Direct {
 	return &Direct{
 		Base: &Base{
 			name: "DIRECT",
-			tp:   C.Direct,
+			tp:   constant.Direct,
 			udp:  true,
 		},
 	}

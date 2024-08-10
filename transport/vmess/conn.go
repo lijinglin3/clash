@@ -11,7 +11,7 @@ import (
 	"errors"
 	"hash/fnv"
 	"io"
-	mathRand "math/rand"
+	mathrand "math/rand"
 	"net"
 	"time"
 
@@ -98,7 +98,7 @@ func (vc *Conn) sendRequest() error {
 	buf.PutUint8(vc.respV)
 	buf.PutUint8(vc.option)
 
-	p := mathRand.Intn(16)
+	p := mathrand.Intn(16)
 	// P Sec Reserve Cmd
 	buf.PutUint8(byte(p<<4) | vc.security)
 	buf.PutUint8(0)
@@ -236,7 +236,7 @@ func hashTimestamp(t time.Time) []byte {
 }
 
 // newConn return a Conn instance
-func newConn(conn net.Conn, id *ID, dst *DstAddr, security Security, isAead bool, isVless bool) (*Conn, error) {
+func newConn(conn net.Conn, id *ID, dst *DstAddr, security Security, isAead, isVless bool) (*Conn, error) {
 	var (
 		reqBodyKey  []byte
 		reqBodyIV   []byte

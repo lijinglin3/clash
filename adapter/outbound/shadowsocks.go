@@ -9,11 +9,11 @@ import (
 
 	"github.com/lijinglin3/clash/common/structure"
 	"github.com/lijinglin3/clash/component/dialer"
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 	"github.com/lijinglin3/clash/transport/shadowsocks/core"
 	obfs "github.com/lijinglin3/clash/transport/simple-obfs"
 	"github.com/lijinglin3/clash/transport/socks5"
-	v2rayObfs "github.com/lijinglin3/clash/transport/v2ray-plugin"
+	v2rayobfs "github.com/lijinglin3/clash/transport/v2ray-plugin"
 )
 
 type ShadowSocks struct {
@@ -23,7 +23,7 @@ type ShadowSocks struct {
 	// obfs
 	obfsMode    string
 	obfsOption  *simpleObfsOption
-	v2rayOption *v2rayObfs.Option
+	v2rayOption *v2rayobfs.Option
 }
 
 type ShadowSocksOption struct {
@@ -53,8 +53,8 @@ type v2rayObfsOption struct {
 	Mux            bool              `obfs:"mux,omitempty"`
 }
 
-// StreamConn implements C.ProxyAdapter
-func (ss *ShadowSocks) StreamConn(c net.Conn, metadata *C.Metadata) (net.Conn, error) {
+// StreamConn implements constant.ProxyAdapter
+func (ss *ShadowSocks) StreamConn(c net.Conn, metadata *constant.Metadata) (net.Conn, error) {
 	switch ss.obfsMode {
 	case "tls":
 		c = obfs.NewTLSObfs(c, ss.obfsOption.Host)
@@ -63,7 +63,7 @@ func (ss *ShadowSocks) StreamConn(c net.Conn, metadata *C.Metadata) (net.Conn, e
 		c = obfs.NewHTTPObfs(c, ss.obfsOption.Host, port)
 	case "websocket":
 		var err error
-		c, err = v2rayObfs.NewV2rayObfs(c, ss.v2rayOption)
+		c, err = v2rayobfs.NewV2rayObfs(c, ss.v2rayOption)
 		if err != nil {
 			return nil, fmt.Errorf("%s connect error: %w", ss.addr, err)
 		}
@@ -73,8 +73,8 @@ func (ss *ShadowSocks) StreamConn(c net.Conn, metadata *C.Metadata) (net.Conn, e
 	return c, err
 }
 
-// DialContext implements C.ProxyAdapter
-func (ss *ShadowSocks) DialContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (_ C.Conn, err error) {
+// DialContext implements constant.ProxyAdapter
+func (ss *ShadowSocks) DialContext(ctx context.Context, metadata *constant.Metadata, opts ...dialer.Option) (_ constant.Conn, err error) {
 	c, err := dialer.DialContext(ctx, "tcp", ss.addr, ss.Base.DialOptions(opts...)...)
 	if err != nil {
 		return nil, fmt.Errorf("%s connect error: %w", ss.addr, err)
@@ -89,8 +89,8 @@ func (ss *ShadowSocks) DialContext(ctx context.Context, metadata *C.Metadata, op
 	return NewConn(c, ss), err
 }
 
-// ListenPacketContext implements C.ProxyAdapter
-func (ss *ShadowSocks) ListenPacketContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (C.PacketConn, error) {
+// ListenPacketContext implements constant.ProxyAdapter
+func (ss *ShadowSocks) ListenPacketContext(ctx context.Context, metadata *constant.Metadata, opts ...dialer.Option) (constant.PacketConn, error) {
 	pc, err := dialer.ListenPacket(ctx, "udp", "", ss.Base.DialOptions(opts...)...)
 	if err != nil {
 		return nil, err
@@ -115,7 +115,7 @@ func NewShadowSocks(option ShadowSocksOption) (*ShadowSocks, error) {
 		return nil, fmt.Errorf("ss %s initialize error: %w", addr, err)
 	}
 
-	var v2rayOption *v2rayObfs.Option
+	var v2rayOption *v2rayobfs.Option
 	var obfsOption *simpleObfsOption
 	obfsMode := ""
 
@@ -141,7 +141,7 @@ func NewShadowSocks(option ShadowSocksOption) (*ShadowSocks, error) {
 			return nil, fmt.Errorf("ss %s obfs mode error: %s", addr, opts.Mode)
 		}
 		obfsMode = opts.Mode
-		v2rayOption = &v2rayObfs.Option{
+		v2rayOption = &v2rayobfs.Option{
 			Host:    opts.Host,
 			Path:    opts.Path,
 			Headers: opts.Headers,
@@ -158,7 +158,7 @@ func NewShadowSocks(option ShadowSocksOption) (*ShadowSocks, error) {
 		Base: &Base{
 			name:  option.Name,
 			addr:  addr,
-			tp:    C.Shadowsocks,
+			tp:    constant.Shadowsocks,
 			udp:   option.UDP,
 			iface: option.Interface,
 			rmark: option.RoutingMark,

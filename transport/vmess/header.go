@@ -49,9 +49,9 @@ func (h *hMacCreator) Create() hash.Hash {
 	return hmac.New(h.parent.Create, h.value)
 }
 
-func createAuthID(cmdKey []byte, time int64) [16]byte {
+func createAuthID(cmdKey []byte, t int64) [16]byte {
 	buf := protobytes.BytesWriter{}
-	buf.PutUint64be(uint64(time))
+	buf.PutUint64be(uint64(t))
 	buf.ReadFull(rand.Reader, 4)
 	zero := crc32.ChecksumIEEE(buf.Bytes())
 	buf.PutUint32be(zero)

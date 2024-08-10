@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/lijinglin3/clash/component/profile"
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 	"github.com/lijinglin3/clash/log"
 
 	"go.etcd.io/bbolt"
@@ -137,15 +137,15 @@ func (c *CacheFile) Close() error {
 // Cache return singleton of CacheFile
 var Cache = sync.OnceValue(func() *CacheFile {
 	options := bbolt.Options{Timeout: time.Second}
-	db, err := bbolt.Open(C.Path.Cache(), fileMode, &options)
+	db, err := bbolt.Open(constant.Path.Cache(), fileMode, &options)
 	switch err {
 	case bbolt.ErrInvalid, bbolt.ErrChecksum, bbolt.ErrVersionMismatch:
-		if err = os.Remove(C.Path.Cache()); err != nil {
+		if err = os.Remove(constant.Path.Cache()); err != nil {
 			log.Warnln("[CacheFile] remove invalid cache file error: %s", err.Error())
 			break
 		}
 		log.Infoln("[CacheFile] remove invalid cache file and create new one")
-		db, err = bbolt.Open(C.Path.Cache(), fileMode, &options)
+		db, err = bbolt.Open(constant.Path.Cache(), fileMode, &options)
 	}
 	if err != nil {
 		log.Warnln("[CacheFile] can't open cache file: %s", err.Error())

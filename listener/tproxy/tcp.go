@@ -4,7 +4,7 @@ import (
 	"net"
 
 	"github.com/lijinglin3/clash/adapter/inbound"
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 	"github.com/lijinglin3/clash/transport/socks5"
 )
 
@@ -14,29 +14,29 @@ type Listener struct {
 	closed   bool
 }
 
-// RawAddress implements C.Listener
+// RawAddress implements constant.Listener
 func (l *Listener) RawAddress() string {
 	return l.addr
 }
 
-// Address implements C.Listener
+// Address implements constant.Listener
 func (l *Listener) Address() string {
 	return l.listener.Addr().String()
 }
 
-// Close implements C.Listener
+// Close implements constant.Listener
 func (l *Listener) Close() error {
 	l.closed = true
 	return l.listener.Close()
 }
 
-func (l *Listener) handleTProxy(conn net.Conn, in chan<- C.ConnContext) {
+func (l *Listener) handleTProxy(conn net.Conn, in chan<- constant.ConnContext) {
 	target := socks5.ParseAddrToSocksAddr(conn.LocalAddr())
 	conn.(*net.TCPConn).SetKeepAlive(true)
-	in <- inbound.NewSocket(target, conn, C.TPROXY)
+	in <- inbound.NewSocket(target, conn, constant.TPROXY)
 }
 
-func New(addr string, in chan<- C.ConnContext) (C.Listener, error) {
+func New(addr string, in chan<- constant.ConnContext) (constant.Listener, error) {
 	l, err := net.Listen("tcp", addr)
 	if err != nil {
 		return nil, err

@@ -5,10 +5,10 @@ import (
 
 	"github.com/lijinglin3/clash/adapter/outbound"
 	"github.com/lijinglin3/clash/common/structure"
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 )
 
-func ParseProxy(mapping map[string]any) (C.Proxy, error) {
+func ParseProxy(mapping map[string]any) (constant.Proxy, error) {
 	decoder := structure.NewDecoder(structure.Option{TagName: "proxy", WeaklyTypedInput: true})
 	proxyType, existType := mapping["type"].(string)
 	if !existType {
@@ -16,7 +16,7 @@ func ParseProxy(mapping map[string]any) (C.Proxy, error) {
 	}
 
 	var (
-		proxy C.ProxyAdapter
+		proxy constant.ProxyAdapter
 		err   error
 	)
 	switch proxyType {
@@ -42,12 +42,12 @@ func ParseProxy(mapping map[string]any) (C.Proxy, error) {
 		}
 		proxy = outbound.NewSocks5(*socksOption)
 	case "http":
-		httpOption := &outbound.HttpOption{}
+		httpOption := &outbound.HTTPOption{}
 		err = decoder.Decode(mapping, httpOption)
 		if err != nil {
 			break
 		}
-		proxy = outbound.NewHttp(*httpOption)
+		proxy = outbound.NewHTTP(*httpOption)
 	case "vless":
 		fallthrough
 	case "vmess":

@@ -1,13 +1,13 @@
-package rules
+package rule
 
 import (
 	"github.com/lijinglin3/clash/component/ipset"
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 	"github.com/lijinglin3/clash/log"
 )
 
-// Implements C.Rule
-var _ C.Rule = (*IPSet)(nil)
+// Implements constant.Rule
+var _ constant.Rule = (*IPSet)(nil)
 
 type IPSet struct {
 	name        string
@@ -15,11 +15,11 @@ type IPSet struct {
 	noResolveIP bool
 }
 
-func (f *IPSet) RuleType() C.RuleType {
-	return C.IPSet
+func (f *IPSet) RuleType() constant.RuleType {
+	return constant.IPSet
 }
 
-func (f *IPSet) Match(metadata *C.Metadata) bool {
+func (f *IPSet) Match(metadata *constant.Metadata) bool {
 	exist, err := ipset.Test(f.name, metadata.DstIP)
 	if err != nil {
 		log.Warnln("check ipset '%s' failed: %s", f.name, err.Error())
@@ -44,7 +44,7 @@ func (f *IPSet) ShouldFindProcess() bool {
 	return false
 }
 
-func NewIPSet(name string, adapter string, noResolveIP bool) (*IPSet, error) {
+func NewIPSet(name, adapter string, noResolveIP bool) (*IPSet, error) {
 	if err := ipset.Verify(name); err != nil {
 		return nil, err
 	}

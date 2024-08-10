@@ -172,9 +172,8 @@ func dualStackDialContext(ctx context.Context, network, address string, options 
 				return nil, primary.error
 			} else if fallback.resolved {
 				return nil, fallback.error
-			} else {
-				return nil, primary.error
 			}
+			return nil, primary.error
 		}
 	}
 

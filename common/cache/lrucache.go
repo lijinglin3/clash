@@ -12,7 +12,7 @@ import (
 type Option func(*LruCache)
 
 // EvictCallback is used to get a callback when a cache entry is evicted
-type EvictCallback = func(key any, value any)
+type EvictCallback = func(key, value any)
 
 // WithEvict set the evict callback
 func WithEvict(cb EvictCallback) Option {
@@ -113,7 +113,7 @@ func (c *LruCache) Exist(key any) bool {
 }
 
 // Set stores the any representation of a response for a given key.
-func (c *LruCache) Set(key any, value any) {
+func (c *LruCache) Set(key, value any) {
 	expires := int64(0)
 	if c.maxAge > 0 {
 		expires = time.Now().Unix() + c.maxAge
@@ -123,7 +123,7 @@ func (c *LruCache) Set(key any, value any) {
 
 // SetWithExpire stores the any representation of a response for a given key and given expires.
 // The expires time will round to second.
-func (c *LruCache) SetWithExpire(key any, value any, expires time.Time) {
+func (c *LruCache) SetWithExpire(key, value any, expires time.Time) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -137,7 +137,7 @@ func (c *LruCache) SetWithExpire(key any, value any, expires time.Time) {
 		c.cache[key] = c.lru.PushBack(e)
 
 		if c.maxSize > 0 {
-			if len := c.lru.Len(); len > c.maxSize {
+			if length := c.lru.Len(); length > c.maxSize {
 				c.deleteElement(c.lru.Front())
 			}
 		}

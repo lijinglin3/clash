@@ -1,24 +1,24 @@
-package rules
+package rule
 
 import (
 	"strings"
 
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 )
 
-// Implements C.Rule
-var _ C.Rule = (*DomainSuffix)(nil)
+// Implements constant.Rule
+var _ constant.Rule = (*DomainSuffix)(nil)
 
 type DomainSuffix struct {
 	suffix  string
 	adapter string
 }
 
-func (ds *DomainSuffix) RuleType() C.RuleType {
-	return C.DomainSuffix
+func (ds *DomainSuffix) RuleType() constant.RuleType {
+	return constant.DomainSuffix
 }
 
-func (ds *DomainSuffix) Match(metadata *C.Metadata) bool {
+func (ds *DomainSuffix) Match(metadata *constant.Metadata) bool {
 	domain := metadata.Host
 	return strings.HasSuffix(domain, "."+ds.suffix) || domain == ds.suffix
 }
@@ -39,7 +39,7 @@ func (ds *DomainSuffix) ShouldFindProcess() bool {
 	return false
 }
 
-func NewDomainSuffix(suffix string, adapter string) *DomainSuffix {
+func NewDomainSuffix(suffix, adapter string) *DomainSuffix {
 	return &DomainSuffix{
 		suffix:  strings.ToLower(suffix),
 		adapter: adapter,

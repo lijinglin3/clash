@@ -6,11 +6,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/lijinglin3/clash/adapter/outbound"
+	"github.com/lijinglin3/clash/constant"
+
 	"github.com/docker/docker/api/types/container"
 	"github.com/stretchr/testify/require"
-
-	"github.com/lijinglin3/clash/adapter/outbound"
-	C "github.com/lijinglin3/clash/constant"
 )
 
 func TestClash_Trojan(t *testing.T) {
@@ -21,9 +21,9 @@ func TestClash_Trojan(t *testing.T) {
 	hostCfg := &container.HostConfig{
 		PortBindings: defaultPortBindings,
 		Binds: []string{
-			fmt.Sprintf("%s:/config/config.json", C.Path.Resolve("trojan.json")),
-			fmt.Sprintf("%s:/path/to/certificate.crt", C.Path.Resolve("example.org.pem")),
-			fmt.Sprintf("%s:/path/to/private.key", C.Path.Resolve("example.org-key.pem")),
+			fmt.Sprintf("%s:/config/config.json", constant.Path.Resolve("trojan.json")),
+			fmt.Sprintf("%s:/path/to/certificate.crt", constant.Path.Resolve("example.org.pem")),
+			fmt.Sprintf("%s:/path/to/private.key", constant.Path.Resolve("example.org-key.pem")),
 		},
 	}
 
@@ -57,9 +57,9 @@ func TestClash_TrojanGrpc(t *testing.T) {
 	hostCfg := &container.HostConfig{
 		PortBindings: defaultPortBindings,
 		Binds: []string{
-			fmt.Sprintf("%s:/etc/xray/config.json", C.Path.Resolve("trojan-grpc.json")),
-			fmt.Sprintf("%s:/etc/ssl/v2ray/fullchain.pem", C.Path.Resolve("example.org.pem")),
-			fmt.Sprintf("%s:/etc/ssl/v2ray/privkey.pem", C.Path.Resolve("example.org-key.pem")),
+			fmt.Sprintf("%s:/etc/xray/config.json", constant.Path.Resolve("trojan-grpc.json")),
+			fmt.Sprintf("%s:/etc/ssl/v2ray/fullchain.pem", constant.Path.Resolve("example.org.pem")),
+			fmt.Sprintf("%s:/etc/ssl/v2ray/privkey.pem", constant.Path.Resolve("example.org-key.pem")),
 		},
 	}
 
@@ -96,9 +96,9 @@ func TestClash_TrojanWebsocket(t *testing.T) {
 	hostCfg := &container.HostConfig{
 		PortBindings: defaultPortBindings,
 		Binds: []string{
-			fmt.Sprintf("%s:/etc/trojan-go/config.json", C.Path.Resolve("trojan-ws.json")),
-			fmt.Sprintf("%s:/fullchain.pem", C.Path.Resolve("example.org.pem")),
-			fmt.Sprintf("%s:/privkey.pem", C.Path.Resolve("example.org-key.pem")),
+			fmt.Sprintf("%s:/etc/trojan-go/config.json", constant.Path.Resolve("trojan-ws.json")),
+			fmt.Sprintf("%s:/fullchain.pem", constant.Path.Resolve("example.org.pem")),
+			fmt.Sprintf("%s:/privkey.pem", constant.Path.Resolve("example.org-key.pem")),
 		},
 	}
 
@@ -132,9 +132,9 @@ func Benchmark_Trojan(b *testing.B) {
 	hostCfg := &container.HostConfig{
 		PortBindings: defaultPortBindings,
 		Binds: []string{
-			fmt.Sprintf("%s:/config/config.json", C.Path.Resolve("trojan.json")),
-			fmt.Sprintf("%s:/path/to/certificate.crt", C.Path.Resolve("example.org.pem")),
-			fmt.Sprintf("%s:/path/to/private.key", C.Path.Resolve("example.org-key.pem")),
+			fmt.Sprintf("%s:/config/config.json", constant.Path.Resolve("trojan.json")),
+			fmt.Sprintf("%s:/path/to/certificate.crt", constant.Path.Resolve("example.org.pem")),
+			fmt.Sprintf("%s:/path/to/private.key", constant.Path.Resolve("example.org-key.pem")),
 		},
 	}
 

@@ -11,13 +11,13 @@ import (
 	"github.com/lijinglin3/clash/common/murmur3"
 	"github.com/lijinglin3/clash/common/singledo"
 	"github.com/lijinglin3/clash/component/dialer"
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 	"github.com/lijinglin3/clash/constant/provider"
 
 	"golang.org/x/net/publicsuffix"
 )
 
-type strategyFn = func(proxies []C.Proxy, metadata *C.Metadata) C.Proxy
+type strategyFn = func(proxies []constant.Proxy, metadata *constant.Metadata) constant.Proxy
 
 type LoadBalance struct {
 	*outbound.Base
@@ -36,7 +36,7 @@ func parseStrategy(config map[string]any) string {
 	return "consistent-hashing"
 }
 
-func getKey(metadata *C.Metadata) string {
+func getKey(metadata *constant.Metadata) string {
 	if metadata.Host != "" {
 		// ip host
 		if ip := net.ParseIP(metadata.Host); ip != nil {
@@ -67,8 +67,8 @@ func jumpHash(key uint64, buckets int32) int32 {
 	return int32(b)
 }
 
-// DialContext implements C.ProxyAdapter
-func (lb *LoadBalance) DialContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (c C.Conn, err error) {
+// DialContext implements constant.ProxyAdapter
+func (lb *LoadBalance) DialContext(ctx context.Context, metadata *constant.Metadata, opts ...dialer.Option) (c constant.Conn, err error) {
 	defer func() {
 		if err == nil {
 			c.AppendToChains(lb)
@@ -81,8 +81,8 @@ func (lb *LoadBalance) DialContext(ctx context.Context, metadata *C.Metadata, op
 	return
 }
 
-// ListenPacketContext implements C.ProxyAdapter
-func (lb *LoadBalance) ListenPacketContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (pc C.PacketConn, err error) {
+// ListenPacketContext implements constant.ProxyAdapter
+func (lb *LoadBalance) ListenPacketContext(ctx context.Context, metadata *constant.Metadata, opts ...dialer.Option) (pc constant.PacketConn, err error) {
 	defer func() {
 		if err == nil {
 			pc.AppendToChains(lb)
@@ -93,14 +93,14 @@ func (lb *LoadBalance) ListenPacketContext(ctx context.Context, metadata *C.Meta
 	return proxy.ListenPacketContext(ctx, metadata, lb.Base.DialOptions(opts...)...)
 }
 
-// SupportUDP implements C.ProxyAdapter
+// SupportUDP implements constant.ProxyAdapter
 func (lb *LoadBalance) SupportUDP() bool {
 	return !lb.disableUDP
 }
 
 func strategyRoundRobin() strategyFn {
 	idx := 0
-	return func(proxies []C.Proxy, metadata *C.Metadata) C.Proxy {
+	return func(proxies []constant.Proxy, metadata *constant.Metadata) constant.Proxy {
 		length := len(proxies)
 		for i := 0; i < length; i++ {
 			idx = (idx + 1) % length
@@ -116,7 +116,7 @@ func strategyRoundRobin() strategyFn {
 
 func strategyConsistentHashing() strategyFn {
 	maxRetry := 5
-	return func(proxies []C.Proxy, metadata *C.Metadata) C.Proxy {
+	return func(proxies []constant.Proxy, metadata *constant.Metadata) constant.Proxy {
 		key := uint64(murmur3.Sum32([]byte(getKey(metadata))))
 		buckets := int32(len(proxies))
 		for i := 0; i < maxRetry; i, key = i+1, key+1 {
@@ -138,21 +138,21 @@ func strategyConsistentHashing() strategyFn {
 	}
 }
 
-// Unwrap implements C.ProxyAdapter
-func (lb *LoadBalance) Unwrap(metadata *C.Metadata) C.Proxy {
+// Unwrap implements constant.ProxyAdapter
+func (lb *LoadBalance) Unwrap(metadata *constant.Metadata) constant.Proxy {
 	proxies := lb.proxies(true)
 	return lb.strategyFn(proxies, metadata)
 }
 
-func (lb *LoadBalance) proxies(touch bool) []C.Proxy {
-	elm, _, _ := lb.single.Do(func() (any, error) {
+func (lb *LoadBalance) proxies(touch bool) []constant.Proxy {
+	_, elm, _ := lb.single.Do(func() (any, error) {
 		return getProvidersProxies(lb.providers, touch), nil
 	})
 
-	return elm.([]C.Proxy)
+	return elm.([]constant.Proxy)
 }
 
-// MarshalJSON implements C.ProxyAdapter
+// MarshalJSON implements constant.ProxyAdapter
 func (lb *LoadBalance) MarshalJSON() ([]byte, error) {
 	var all []string
 	for _, proxy := range lb.proxies(false) {
@@ -177,7 +177,7 @@ func NewLoadBalance(option *GroupCommonOption, providers []provider.ProxyProvide
 	return &LoadBalance{
 		Base: outbound.NewBase(outbound.BaseOption{
 			Name:        option.Name,
-			Type:        C.LoadBalance,
+			Type:        constant.LoadBalance,
 			Interface:   option.Interface,
 			RoutingMark: option.RoutingMark,
 		}),

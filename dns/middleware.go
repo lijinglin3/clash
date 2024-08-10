@@ -8,21 +8,21 @@ import (
 	"github.com/lijinglin3/clash/common/cache"
 	"github.com/lijinglin3/clash/component/fakeip"
 	"github.com/lijinglin3/clash/component/trie"
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 	"github.com/lijinglin3/clash/context"
 	"github.com/lijinglin3/clash/log"
 
-	D "github.com/miekg/dns"
+	"github.com/miekg/dns"
 )
 
 type (
-	handler    func(ctx *context.DNSContext, r *D.Msg) (*D.Msg, error)
+	handler    func(ctx *context.DNSContext, r *dns.Msg) (*dns.Msg, error)
 	middleware func(next handler) handler
 )
 
 func withHosts(hosts *trie.DomainTrie) middleware {
 	return func(next handler) handler {
-		return func(ctx *context.DNSContext, r *D.Msg) (*D.Msg, error) {
+		return func(ctx *context.DNSContext, r *dns.Msg) (*dns.Msg, error) {
 			q := r.Question[0]
 
 			if !isIPRequest(q) {
@@ -37,24 +37,24 @@ func withHosts(hosts *trie.DomainTrie) middleware {
 			ip := record.Data.(net.IP)
 			msg := r.Copy()
 
-			if v4 := ip.To4(); v4 != nil && q.Qtype == D.TypeA {
-				rr := &D.A{}
-				rr.Hdr = D.RR_Header{Name: q.Name, Rrtype: D.TypeA, Class: D.ClassINET, Ttl: dnsDefaultTTL}
+			if v4 := ip.To4(); v4 != nil && q.Qtype == dns.TypeA {
+				rr := &dns.A{}
+				rr.Hdr = dns.RR_Header{Name: q.Name, Rrtype: dns.TypeA, Class: dns.ClassINET, Ttl: dnsDefaultTTL}
 				rr.A = v4
 
-				msg.Answer = []D.RR{rr}
-			} else if v6 := ip.To16(); v6 != nil && q.Qtype == D.TypeAAAA {
-				rr := &D.AAAA{}
-				rr.Hdr = D.RR_Header{Name: q.Name, Rrtype: D.TypeAAAA, Class: D.ClassINET, Ttl: dnsDefaultTTL}
+				msg.Answer = []dns.RR{rr}
+			} else if v6 := ip.To16(); v6 != nil && q.Qtype == dns.TypeAAAA {
+				rr := &dns.AAAA{}
+				rr.Hdr = dns.RR_Header{Name: q.Name, Rrtype: dns.TypeAAAA, Class: dns.ClassINET, Ttl: dnsDefaultTTL}
 				rr.AAAA = v6
 
-				msg.Answer = []D.RR{rr}
+				msg.Answer = []dns.RR{rr}
 			} else {
 				return next(ctx, r)
 			}
 
 			ctx.SetType(context.DNSTypeHost)
-			msg.SetRcode(r, D.RcodeSuccess)
+			msg.SetRcode(r, dns.RcodeSuccess)
 			msg.Authoritative = true
 			msg.RecursionAvailable = true
 
@@ -65,7 +65,7 @@ func withHosts(hosts *trie.DomainTrie) middleware {
 
 func withMapping(mapping *cache.LruCache) middleware {
 	return func(next handler) handler {
-		return func(ctx *context.DNSContext, r *D.Msg) (*D.Msg, error) {
+		return func(ctx *context.DNSContext, r *dns.Msg) (*dns.Msg, error) {
 			q := r.Question[0]
 
 			if !isIPRequest(q) {
@@ -84,13 +84,13 @@ func withMapping(mapping *cache.LruCache) middleware {
 				var ttl uint32
 
 				switch a := ans.(type) {
-				case *D.A:
+				case *dns.A:
 					ip = a.A
 					ttl = a.Hdr.Ttl
 					if !ip.IsGlobalUnicast() {
 						continue
 					}
-				case *D.AAAA:
+				case *dns.AAAA:
 					ip = a.AAAA
 					ttl = a.Hdr.Ttl
 					if !ip.IsGlobalUnicast() {
@@ -113,7 +113,7 @@ func withMapping(mapping *cache.LruCache) middleware {
 
 func withFakeIP(fakePool *fakeip.Pool) middleware {
 	return func(next handler) handler {
-		return func(ctx *context.DNSContext, r *D.Msg) (*D.Msg, error) {
+		return func(ctx *context.DNSContext, r *dns.Msg) (*dns.Msg, error) {
 			q := r.Question[0]
 
 			host := strings.TrimRight(q.Name, ".")
@@ -122,24 +122,24 @@ func withFakeIP(fakePool *fakeip.Pool) middleware {
 			}
 
 			switch q.Qtype {
-			case D.TypeAAAA, D.TypeSVCB, D.TypeHTTPS:
+			case dns.TypeAAAA, dns.TypeSVCB, dns.TypeHTTPS:
 				return handleMsgWithEmptyAnswer(r), nil
 			}
 
-			if q.Qtype != D.TypeA {
+			if q.Qtype != dns.TypeA {
 				return next(ctx, r)
 			}
 
-			rr := &D.A{}
-			rr.Hdr = D.RR_Header{Name: q.Name, Rrtype: D.TypeA, Class: D.ClassINET, Ttl: dnsDefaultTTL}
+			rr := &dns.A{}
+			rr.Hdr = dns.RR_Header{Name: q.Name, Rrtype: dns.TypeA, Class: dns.ClassINET, Ttl: dnsDefaultTTL}
 			ip := fakePool.Lookup(host)
 			rr.A = ip
 			msg := r.Copy()
-			msg.Answer = []D.RR{rr}
+			msg.Answer = []dns.RR{rr}
 
 			ctx.SetType(context.DNSTypeFakeIP)
 			setMsgTTL(msg, 1)
-			msg.SetRcode(r, D.RcodeSuccess)
+			msg.SetRcode(r, dns.RcodeSuccess)
 			msg.Authoritative = true
 			msg.RecursionAvailable = true
 
@@ -149,12 +149,12 @@ func withFakeIP(fakePool *fakeip.Pool) middleware {
 }
 
 func withResolver(resolver *Resolver) handler {
-	return func(ctx *context.DNSContext, r *D.Msg) (*D.Msg, error) {
+	return func(ctx *context.DNSContext, r *dns.Msg) (*dns.Msg, error) {
 		ctx.SetType(context.DNSTypeRaw)
 		q := r.Question[0]
 
 		// return a empty AAAA msg when ipv6 disabled
-		if !resolver.ipv6 && q.Qtype == D.TypeAAAA {
+		if !resolver.ipv6 && q.Qtype == dns.TypeAAAA {
 			return handleMsgWithEmptyAnswer(r), nil
 		}
 
@@ -188,7 +188,7 @@ func newHandler(resolver *Resolver, mapper *ResolverEnhancer) handler {
 		middlewares = append(middlewares, withHosts(resolver.hosts))
 	}
 
-	if mapper.mode == C.DNSFakeIP {
+	if mapper.mode == constant.DNSFakeIP {
 		middlewares = append(middlewares, withFakeIP(mapper.fakePool))
 		middlewares = append(middlewares, withMapping(mapper.mapping))
 	}

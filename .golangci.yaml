@@ -1,26 +1,86 @@
 linters:
-  disable-all: true
   enable:
-    - gci
-    - gofumpt
     - gosimple
     - govet
     - ineffassign
-    - misspell
     - staticcheck
+    - typecheck
+
+    - gofmt
+    - goimports
+    - gofumpt
+    - tagalign
+    - whitespace
+    - revive
+    - gci
+    - misspell
     - unconvert
     - unused
     - usestdlibvars
     - exhaustive
+  disable:
+    - errcheck
+    - bodyclose
 
 linters-settings:
+  staticcheck:
+    checks:
+      - "all"
+      - "-SA1029" # gin.Context 的 Set 接口必须使用 string 类型的 key
+  goimports:
+    local-prefixes: github.com/lijinglin3/clash
+  gofumpt:
+    extra-rules: true
   gci:
     custom-order: true
     sections:
       - standard
       - prefix(github.com/lijinglin3/clash)
       - default
-  staticcheck:
-    go: '1.21'
   exhaustive:
     default-signifies-exhaustive: true
+  revive: # https://golangci-lint.run/usage/linters/#revive
+    enable-all-rules: true
+    rules:
+      - name: add-constant
+        disabled: true
+      - name: unhandled-error
+        disabled: true
+      - name:  bare-return
+        disabled: true
+      - name: line-length-limit
+        disabled: true
+      - name: cyclomatic
+        disabled: true
+      - name: unused-receiver
+        disabled: true
+      - name: cognitive-complexity
+        disabled: true
+      - name: function-length
+        disabled: true
+      - name: unchecked-type-assertion
+        disabled: true
+      - name: confusing-naming
+        disabled: true
+      - name: unused-parameter
+        disabled: true
+      - name: flag-parameter
+        disabled: true
+      - name: blank-imports
+        disabled: true
+      - name: deep-exit
+        disabled: true
+      - name: confusing-results
+        disabled: true
+      - name: max-public-structs
+        disabled: true
+      - name: function-result-limit
+        disabled: true
+      - name: import-shadowing
+        disabled: true
+      - name: get-return
+        disabled: true
+      - name: empty-block
+        disabled: true
+      - name: defer
+        disabled: true

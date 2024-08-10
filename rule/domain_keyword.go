@@ -1,24 +1,24 @@
-package rules
+package rule
 
 import (
 	"strings"
 
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 )
 
-// Implements C.Rule
-var _ C.Rule = (*DomainKeyword)(nil)
+// Implements constant.Rule
+var _ constant.Rule = (*DomainKeyword)(nil)
 
 type DomainKeyword struct {
 	keyword string
 	adapter string
 }
 
-func (dk *DomainKeyword) RuleType() C.RuleType {
-	return C.DomainKeyword
+func (dk *DomainKeyword) RuleType() constant.RuleType {
+	return constant.DomainKeyword
 }
 
-func (dk *DomainKeyword) Match(metadata *C.Metadata) bool {
+func (dk *DomainKeyword) Match(metadata *constant.Metadata) bool {
 	return strings.Contains(metadata.Host, dk.keyword)
 }
 
@@ -38,7 +38,7 @@ func (dk *DomainKeyword) ShouldFindProcess() bool {
 	return false
 }
 
-func NewDomainKeyword(keyword string, adapter string) *DomainKeyword {
+func NewDomainKeyword(keyword, adapter string) *DomainKeyword {
 	return &DomainKeyword{
 		keyword: strings.ToLower(keyword),
 		adapter: adapter,

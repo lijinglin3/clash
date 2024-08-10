@@ -1,14 +1,14 @@
-package rules
+package rule
 
 import (
 	"path/filepath"
 	"strings"
 
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 )
 
-// Implements C.Rule
-var _ C.Rule = (*Process)(nil)
+// Implements constant.Rule
+var _ constant.Rule = (*Process)(nil)
 
 type Process struct {
 	adapter  string
@@ -16,15 +16,15 @@ type Process struct {
 	nameOnly bool
 }
 
-func (ps *Process) RuleType() C.RuleType {
+func (ps *Process) RuleType() constant.RuleType {
 	if ps.nameOnly {
-		return C.Process
+		return constant.Process
 	}
 
-	return C.ProcessPath
+	return constant.ProcessPath
 }
 
-func (ps *Process) Match(metadata *C.Metadata) bool {
+func (ps *Process) Match(metadata *constant.Metadata) bool {
 	if ps.nameOnly {
 		return strings.EqualFold(filepath.Base(metadata.ProcessPath), ps.process)
 	}
@@ -48,7 +48,7 @@ func (ps *Process) ShouldFindProcess() bool {
 	return true
 }
 
-func NewProcess(process string, adapter string, nameOnly bool) (*Process, error) {
+func NewProcess(process, adapter string, nameOnly bool) (*Process, error) {
 	return &Process{
 		adapter:  adapter,
 		process:  process,

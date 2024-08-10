@@ -9,7 +9,7 @@ import (
 
 	"github.com/lijinglin3/clash/adapter/inbound"
 	"github.com/lijinglin3/clash/config"
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 	"github.com/lijinglin3/clash/listener/http"
 	"github.com/lijinglin3/clash/listener/mixed"
 	"github.com/lijinglin3/clash/listener/redir"
@@ -25,8 +25,8 @@ var (
 	allowLan    = false
 	bindAddress = "*"
 
-	tcpListeners = map[C.Inbound]C.Listener{}
-	udpListeners = map[C.Inbound]C.Listener{}
+	tcpListeners = map[constant.Inbound]constant.Listener{}
+	udpListeners = map[constant.Inbound]constant.Listener{}
 
 	tunnelTCPListeners = map[string]*tunnel.Listener{}
 	tunnelUDPListeners = map[string]*tunnel.PacketConn{}
@@ -44,24 +44,24 @@ type Ports struct {
 	MixedPort  int `json:"mixed-port"`
 }
 
-var tcpListenerCreators = map[C.InboundType]tcpListenerCreator{
-	C.InboundTypeHTTP:   http.New,
-	C.InboundTypeSocks:  socks.New,
-	C.InboundTypeRedir:  redir.New,
-	C.InboundTypeTproxy: tproxy.New,
-	C.InboundTypeMixed:  mixed.New,
+var tcpListenerCreators = map[constant.InboundType]tcpListenerCreator{
+	constant.InboundTypeHTTP:   http.New,
+	constant.InboundTypeSocks:  socks.New,
+	constant.InboundTypeRedir:  redir.New,
+	constant.InboundTypeTproxy: tproxy.New,
+	constant.InboundTypeMixed:  mixed.New,
 }
 
-var udpListenerCreators = map[C.InboundType]udpListenerCreator{
-	C.InboundTypeSocks:  socks.NewUDP,
-	C.InboundTypeRedir:  tproxy.NewUDP,
-	C.InboundTypeTproxy: tproxy.NewUDP,
-	C.InboundTypeMixed:  socks.NewUDP,
+var udpListenerCreators = map[constant.InboundType]udpListenerCreator{
+	constant.InboundTypeSocks:  socks.NewUDP,
+	constant.InboundTypeRedir:  tproxy.NewUDP,
+	constant.InboundTypeTproxy: tproxy.NewUDP,
+	constant.InboundTypeMixed:  socks.NewUDP,
 }
 
 type (
-	tcpListenerCreator func(addr string, tcpIn chan<- C.ConnContext) (C.Listener, error)
-	udpListenerCreator func(addr string, udpIn chan<- *inbound.PacketAdapter) (C.Listener, error)
+	tcpListenerCreator func(addr string, tcpIn chan<- constant.ConnContext) (constant.Listener, error)
+	udpListenerCreator func(addr string, udpIn chan<- *inbound.PacketAdapter) (constant.Listener, error)
 )
 
 func AllowLan() bool {
@@ -80,7 +80,7 @@ func SetBindAddress(host string) {
 	bindAddress = host
 }
 
-func createListener(inbound C.Inbound, tcpIn chan<- C.ConnContext, udpIn chan<- *inbound.PacketAdapter) {
+func createListener(inbound constant.Inbound, tcpIn chan<- constant.ConnContext, udpIn chan<- *inbound.PacketAdapter) {
 	addr := inbound.BindAddress
 	if portIsZero(addr) {
 		return
@@ -110,7 +110,7 @@ func createListener(inbound C.Inbound, tcpIn chan<- C.ConnContext, udpIn chan<- 
 	log.Infoln("inbound %s created successfully", inbound.ToAlias())
 }
 
-func closeListener(inbound C.Inbound) {
+func closeListener(inbound constant.Inbound) {
 	listener := tcpListeners[inbound]
 	if listener != nil {
 		if err := listener.Close(); err != nil {
@@ -127,10 +127,10 @@ func closeListener(inbound C.Inbound) {
 	}
 }
 
-func getNeedCloseAndCreateInbound(originInbounds []C.Inbound, newInbounds []C.Inbound) ([]C.Inbound, []C.Inbound) {
-	needCloseMap := map[C.Inbound]bool{}
-	needClose := []C.Inbound{}
-	needCreate := []C.Inbound{}
+func getNeedCloseAndCreateInbound(originInbounds, newInbounds []constant.Inbound) ([]constant.Inbound, []constant.Inbound) {
+	needCloseMap := map[constant.Inbound]bool{}
+	needClose := []constant.Inbound{}
+	needCreate := []constant.Inbound{}
 
 	for _, inbound := range originInbounds {
 		needCloseMap[inbound] = true
@@ -149,8 +149,8 @@ func getNeedCloseAndCreateInbound(originInbounds []C.Inbound, newInbounds []C.In
 }
 
 // only recreate inbound config listener
-func ReCreateListeners(inbounds []C.Inbound, tcpIn chan<- C.ConnContext, udpIn chan<- *inbound.PacketAdapter) {
-	newInbounds := []C.Inbound{}
+func ReCreateListeners(inbounds []constant.Inbound, tcpIn chan<- constant.ConnContext, udpIn chan<- *inbound.PacketAdapter) {
+	newInbounds := []constant.Inbound{}
 	newInbounds = append(newInbounds, inbounds...)
 	for _, inbound := range getInbounds() {
 		if inbound.IsFromPortCfg {
@@ -161,20 +161,20 @@ func ReCreateListeners(inbounds []C.Inbound, tcpIn chan<- C.ConnContext, udpIn c
 }
 
 // only recreate ports config listener
-func ReCreatePortsListeners(ports Ports, tcpIn chan<- C.ConnContext, udpIn chan<- *inbound.PacketAdapter) {
-	newInbounds := []C.Inbound{}
+func ReCreatePortsListeners(ports Ports, tcpIn chan<- constant.ConnContext, udpIn chan<- *inbound.PacketAdapter) {
+	newInbounds := []constant.Inbound{}
 	newInbounds = append(newInbounds, GetInbounds()...)
-	newInbounds = addPortInbound(newInbounds, C.InboundTypeHTTP, ports.Port)
-	newInbounds = addPortInbound(newInbounds, C.InboundTypeSocks, ports.SocksPort)
-	newInbounds = addPortInbound(newInbounds, C.InboundTypeRedir, ports.RedirPort)
-	newInbounds = addPortInbound(newInbounds, C.InboundTypeTproxy, ports.TProxyPort)
-	newInbounds = addPortInbound(newInbounds, C.InboundTypeMixed, ports.MixedPort)
+	newInbounds = addPortInbound(newInbounds, constant.InboundTypeHTTP, ports.Port)
+	newInbounds = addPortInbound(newInbounds, constant.InboundTypeSocks, ports.SocksPort)
+	newInbounds = addPortInbound(newInbounds, constant.InboundTypeRedir, ports.RedirPort)
+	newInbounds = addPortInbound(newInbounds, constant.InboundTypeTproxy, ports.TProxyPort)
+	newInbounds = addPortInbound(newInbounds, constant.InboundTypeMixed, ports.MixedPort)
 	reCreateListeners(newInbounds, tcpIn, udpIn)
 }
 
-func addPortInbound(inbounds []C.Inbound, inboundType C.InboundType, port int) []C.Inbound {
+func addPortInbound(inbounds []constant.Inbound, inboundType constant.InboundType, port int) []constant.Inbound {
 	if port != 0 {
-		inbounds = append(inbounds, C.Inbound{
+		inbounds = append(inbounds, constant.Inbound{
 			Type:          inboundType,
 			BindAddress:   genAddr(bindAddress, port, allowLan),
 			IsFromPortCfg: true,
@@ -183,7 +183,7 @@ func addPortInbound(inbounds []C.Inbound, inboundType C.InboundType, port int) [
 	return inbounds
 }
 
-func reCreateListeners(inbounds []C.Inbound, tcpIn chan<- C.ConnContext, udpIn chan<- *inbound.PacketAdapter) {
+func reCreateListeners(inbounds []constant.Inbound, tcpIn chan<- constant.ConnContext, udpIn chan<- *inbound.PacketAdapter) {
 	recreateMux.Lock()
 	defer recreateMux.Unlock()
 	needClose, needCreate := getNeedCloseAndCreateInbound(getInbounds(), inbounds)
@@ -195,7 +195,7 @@ func reCreateListeners(inbounds []C.Inbound, tcpIn chan<- C.ConnContext, udpIn c
 	}
 }
 
-func PatchTunnel(tunnels []config.Tunnel, tcpIn chan<- C.ConnContext, udpIn chan<- *inbound.PacketAdapter) {
+func PatchTunnel(tunnels []config.Tunnel, tcpIn chan<- constant.ConnContext, udpIn chan<- *inbound.PacketAdapter) {
 	tunnelMux.Lock()
 	defer tunnelMux.Unlock()
 
@@ -284,15 +284,15 @@ func PatchTunnel(tunnels []config.Tunnel, tcpIn chan<- C.ConnContext, udpIn chan
 	}
 }
 
-func GetInbounds() []C.Inbound {
-	return lo.Filter(getInbounds(), func(inbound C.Inbound, idx int) bool {
+func GetInbounds() []constant.Inbound {
+	return lo.Filter(getInbounds(), func(inbound constant.Inbound, idx int) bool {
 		return !inbound.IsFromPortCfg
 	})
 }
 
 // GetInbounds return the inbounds of proxy servers
-func getInbounds() []C.Inbound {
-	var inbounds []C.Inbound
+func getInbounds() []constant.Inbound {
+	var inbounds []constant.Inbound
 	for inbound := range tcpListeners {
 		inbounds = append(inbounds, inbound)
 	}
@@ -313,19 +313,19 @@ func GetPorts() *Ports {
 	return ports
 }
 
-func fillPort(inbound C.Inbound, ports *Ports) {
+func fillPort(inbound constant.Inbound, ports *Ports) {
 	if inbound.IsFromPortCfg {
 		port := getPort(inbound.BindAddress)
 		switch inbound.Type {
-		case C.InboundTypeHTTP:
+		case constant.InboundTypeHTTP:
 			ports.Port = port
-		case C.InboundTypeSocks:
+		case constant.InboundTypeSocks:
 			ports.SocksPort = port
-		case C.InboundTypeTproxy:
+		case constant.InboundTypeTproxy:
 			ports.TProxyPort = port
-		case C.InboundTypeRedir:
+		case constant.InboundTypeRedir:
 			ports.RedirPort = port
-		case C.InboundTypeMixed:
+		case constant.InboundTypeMixed:
 			ports.MixedPort = port
 		default:
 			// do nothing

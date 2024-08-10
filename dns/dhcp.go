@@ -11,7 +11,7 @@ import (
 	"github.com/lijinglin3/clash/component/iface"
 	"github.com/lijinglin3/clash/component/resolver"
 
-	D "github.com/miekg/dns"
+	"github.com/miekg/dns"
 )
 
 const (
@@ -33,14 +33,14 @@ type dhcpClient struct {
 	err       error
 }
 
-func (d *dhcpClient) Exchange(m *D.Msg) (msg *D.Msg, err error) {
+func (d *dhcpClient) Exchange(m *dns.Msg) (msg *dns.Msg, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), resolver.DefaultDNSTimeout)
 	defer cancel()
 
 	return d.ExchangeContext(ctx, m)
 }
 
-func (d *dhcpClient) ExchangeContext(ctx context.Context, m *D.Msg) (msg *D.Msg, err error) {
+func (d *dhcpClient) ExchangeContext(ctx context.Context, m *dns.Msg) (msg *dns.Msg, err error) {
 	clients, err := d.resolve(ctx)
 	if err != nil {
 		return nil, err

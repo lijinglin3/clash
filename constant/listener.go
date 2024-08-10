@@ -32,9 +32,9 @@ var supportInboundTypes = map[InboundType]bool{
 }
 
 type inbound struct {
-	Type          InboundType `json:"type" yaml:"type"`
+	Type          InboundType `json:"type"         yaml:"type"`
 	BindAddress   string      `json:"bind-address" yaml:"bind-address"`
-	IsFromPortCfg bool        `json:"-" yaml:"-"`
+	IsFromPortCfg bool        `json:"-"            yaml:"-"`
 }
 
 // Inbound

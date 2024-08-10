@@ -3,18 +3,18 @@ package context
 import (
 	"net"
 
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 
 	"github.com/gofrs/uuid/v5"
 )
 
 type PacketConnContext struct {
 	id         uuid.UUID
-	metadata   *C.Metadata
+	metadata   *constant.Metadata
 	packetConn net.PacketConn
 }
 
-func NewPacketConnContext(metadata *C.Metadata) *PacketConnContext {
+func NewPacketConnContext(metadata *constant.Metadata) *PacketConnContext {
 	id, _ := uuid.NewV4()
 	return &PacketConnContext{
 		id:       id,
@@ -22,22 +22,22 @@ func NewPacketConnContext(metadata *C.Metadata) *PacketConnContext {
 	}
 }
 
-// ID implement C.PacketConnContext ID
+// ID implement constant.PacketConnContext ID
 func (pc *PacketConnContext) ID() uuid.UUID {
 	return pc.id
 }
 
-// Metadata implement C.PacketConnContext Metadata
-func (pc *PacketConnContext) Metadata() *C.Metadata {
+// Metadata implement constant.PacketConnContext Metadata
+func (pc *PacketConnContext) Metadata() *constant.Metadata {
 	return pc.metadata
 }
 
-// PacketConn implement C.PacketConnContext PacketConn
+// PacketConn implement constant.PacketConnContext PacketConn
 func (pc *PacketConnContext) PacketConn() net.PacketConn {
 	return pc.packetConn
 }
 
 // InjectPacketConn injectPacketConn manually
-func (pc *PacketConnContext) InjectPacketConn(pconn C.PacketConn) {
+func (pc *PacketConnContext) InjectPacketConn(pconn constant.PacketConn) {
 	pc.packetConn = pconn
 }

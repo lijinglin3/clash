@@ -8,7 +8,7 @@ import (
 
 	"github.com/lijinglin3/clash/common/structure"
 	"github.com/lijinglin3/clash/component/dialer"
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 	obfs "github.com/lijinglin3/clash/transport/simple-obfs"
 	"github.com/lijinglin3/clash/transport/snell"
 )
@@ -50,15 +50,15 @@ func streamConn(c net.Conn, option streamOption) *snell.Snell {
 	return snell.StreamConn(c, option.psk, option.version)
 }
 
-// StreamConn implements C.ProxyAdapter
-func (s *Snell) StreamConn(c net.Conn, metadata *C.Metadata) (net.Conn, error) {
+// StreamConn implements constant.ProxyAdapter
+func (s *Snell) StreamConn(c net.Conn, metadata *constant.Metadata) (net.Conn, error) {
 	c = streamConn(c, streamOption{s.psk, s.version, s.addr, s.obfsOption})
 	err := snell.WriteHeader(c, metadata.String(), uint(metadata.DstPort), s.version)
 	return c, err
 }
 
-// DialContext implements C.ProxyAdapter
-func (s *Snell) DialContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (_ C.Conn, err error) {
+// DialContext implements constant.ProxyAdapter
+func (s *Snell) DialContext(ctx context.Context, metadata *constant.Metadata, opts ...dialer.Option) (_ constant.Conn, err error) {
 	if s.version == snell.Version2 && len(opts) == 0 {
 		c, err := s.pool.Get()
 		if err != nil {
@@ -86,8 +86,8 @@ func (s *Snell) DialContext(ctx context.Context, metadata *C.Metadata, opts ...d
 	return NewConn(c, s), err
 }
 
-// ListenPacketContext implements C.ProxyAdapter
-func (s *Snell) ListenPacketContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (C.PacketConn, error) {
+// ListenPacketContext implements constant.ProxyAdapter
+func (s *Snell) ListenPacketContext(ctx context.Context, metadata *constant.Metadata, opts ...dialer.Option) (constant.PacketConn, error) {
 	c, err := dialer.DialContext(ctx, "tcp", s.addr, s.Base.DialOptions(opts...)...)
 	if err != nil {
 		return nil, err
@@ -116,7 +116,6 @@ func NewSnell(option SnellOption) (*Snell, error) {
 
 	switch obfsOption.Mode {
 	case "tls", "http", "":
-		break
 	default:
 		return nil, fmt.Errorf("snell %s obfs mode error: %s", addr, obfsOption.Mode)
 	}
@@ -139,7 +138,7 @@ func NewSnell(option SnellOption) (*Snell, error) {
 		Base: &Base{
 			name:  option.Name,
 			addr:  addr,
-			tp:    C.Snell,
+			tp:    constant.Snell,
 			udp:   option.UDP,
 			iface: option.Interface,
 			rmark: option.RoutingMark,

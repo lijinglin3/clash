@@ -8,11 +8,11 @@ import (
 	"time"
 
 	"github.com/lijinglin3/clash/adapter/inbound"
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 	"github.com/lijinglin3/clash/transport/socks5"
 )
 
-func newClient(source net.Addr, originTarget net.Addr, in chan<- C.ConnContext) *http.Client {
+func newClient(source, originTarget net.Addr, in chan<- constant.ConnContext) *http.Client {
 	return &http.Client{
 		Transport: &http.Transport{
 			// from http.DefaultTransport

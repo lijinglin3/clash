@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 	"github.com/lijinglin3/clash/listener"
 	"github.com/lijinglin3/clash/tunnel"
 
@@ -53,9 +53,9 @@ log-level: silent
 	require.True(t, TCPing("127.0.0.1:7890"))
 	require.Equal(t, ports, *listener.GetPorts())
 
-	inbounds := []C.Inbound{
+	inbounds := []constant.Inbound{
 		{
-			Type:        C.InboundTypeHTTP,
+			Type:        constant.InboundTypeHTTP,
 			BindAddress: "127.0.0.1:7891",
 		},
 	}

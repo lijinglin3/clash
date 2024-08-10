@@ -3,7 +3,7 @@ package mmdb
 import (
 	"sync"
 
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 	"github.com/lijinglin3/clash/log"
 
 	"github.com/oschwald/geoip2-golang"
@@ -25,7 +25,7 @@ func LoadFromBytes(buffer []byte) {
 }
 
 func Verify() bool {
-	instance, err := geoip2.Open(C.Path.MMDB())
+	instance, err := geoip2.Open(constant.Path.MMDB())
 	if err == nil {
 		instance.Close()
 	}
@@ -35,7 +35,7 @@ func Verify() bool {
 func Instance() *geoip2.Reader {
 	once.Do(func() {
 		var err error
-		mmdb, err = geoip2.Open(C.Path.MMDB())
+		mmdb, err = geoip2.Open(constant.Path.MMDB())
 		if err != nil {
 			log.Fatalln("Can't load mmdb: %s", err.Error())
 		}

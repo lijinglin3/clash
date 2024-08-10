@@ -7,10 +7,10 @@ import (
 	"github.com/lijinglin3/clash/adapter/outbound"
 	"github.com/lijinglin3/clash/adapter/provider"
 	"github.com/lijinglin3/clash/common/structure"
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 	types "github.com/lijinglin3/clash/constant/provider"
 
-	regexp "github.com/dlclark/regexp2"
+	"github.com/dlclark/regexp2"
 )
 
 var (
@@ -34,7 +34,7 @@ type GroupCommonOption struct {
 	Filter     string   `group:"filter,omitempty"`
 }
 
-func ParseProxyGroup(config map[string]any, proxyMap map[string]C.Proxy, providersMap map[string]types.ProxyProvider) (C.ProxyAdapter, error) {
+func ParseProxyGroup(config map[string]any, proxyMap map[string]constant.Proxy, providersMap map[string]types.ProxyProvider) (constant.ProxyAdapter, error) {
 	decoder := structure.NewDecoder(structure.Option{TagName: "group", WeaklyTypedInput: true})
 
 	groupOption := &GroupCommonOption{
@@ -50,11 +50,11 @@ func ParseProxyGroup(config map[string]any, proxyMap map[string]C.Proxy, provide
 
 	var (
 		groupName = groupOption.Name
-		filterReg *regexp.Regexp
+		filterReg *regexp2.Regexp
 	)
 
 	if groupOption.Filter != "" {
-		f, err := regexp.Compile(groupOption.Filter, regexp.None)
+		f, err := regexp2.Compile(groupOption.Filter, regexp2.None)
 		if err != nil {
 			return nil, fmt.Errorf("%s: invalid filter regex: %w", groupName, err)
 		}
@@ -116,7 +116,7 @@ func ParseProxyGroup(config map[string]any, proxyMap map[string]C.Proxy, provide
 		}
 	}
 
-	var group C.ProxyAdapter
+	var group constant.ProxyAdapter
 	switch groupOption.Type {
 	case "url-test":
 		opts := parseURLTestOption(config)
@@ -137,8 +137,8 @@ func ParseProxyGroup(config map[string]any, proxyMap map[string]C.Proxy, provide
 	return group, nil
 }
 
-func getProxies(mapping map[string]C.Proxy, list []string) ([]C.Proxy, error) {
-	var ps []C.Proxy
+func getProxies(mapping map[string]constant.Proxy, list []string) ([]constant.Proxy, error) {
+	var ps []constant.Proxy
 	for _, name := range list {
 		p, ok := mapping[name]
 		if !ok {

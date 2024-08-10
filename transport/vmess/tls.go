@@ -5,7 +5,7 @@ import (
 	"crypto/tls"
 	"net"
 
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 )
 
 type TLSConfig struct {
@@ -24,7 +24,7 @@ func StreamTLSConn(conn net.Conn, cfg *TLSConfig) (net.Conn, error) {
 	tlsConn := tls.Client(conn, tlsConfig)
 
 	// fix tls handshake not timeout
-	ctx, cancel := context.WithTimeout(context.Background(), C.DefaultTLSTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), constant.DefaultTLSTimeout)
 	defer cancel()
 	err := tlsConn.HandshakeContext(ctx)
 	return tlsConn, err

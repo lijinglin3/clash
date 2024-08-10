@@ -5,11 +5,11 @@ import (
 )
 
 type Authenticator interface {
-	Verify(user string, pass string) bool
+	Verify(user, pass string) bool
 	Users() []string
 }
 
-type AuthUser struct {
+type User struct {
 	User string
 	Pass string
 }
@@ -19,14 +19,14 @@ type inMemoryAuthenticator struct {
 	usernames []string
 }
 
-func (au *inMemoryAuthenticator) Verify(user string, pass string) bool {
+func (au *inMemoryAuthenticator) Verify(user, pass string) bool {
 	realPass, ok := au.storage.Load(user)
 	return ok && realPass == pass
 }
 
 func (au *inMemoryAuthenticator) Users() []string { return au.usernames }
 
-func NewAuthenticator(users []AuthUser) Authenticator {
+func NewAuthenticator(users []User) Authenticator {
 	if len(users) == 0 {
 		return nil
 	}

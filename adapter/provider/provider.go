@@ -10,10 +10,10 @@ import (
 	"github.com/lijinglin3/clash/adapter"
 	"github.com/lijinglin3/clash/adapter/outbound"
 	"github.com/lijinglin3/clash/common/singledo"
-	C "github.com/lijinglin3/clash/constant"
-	types "github.com/lijinglin3/clash/constant/provider"
+	"github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant/provider"
 
-	regexp "github.com/dlclark/regexp2"
+	"github.com/dlclark/regexp2"
 	"github.com/samber/lo"
 	"gopkg.in/yaml.v3"
 )
@@ -35,7 +35,7 @@ type ProxySetProvider struct {
 
 type proxySetProvider struct {
 	*fetcher
-	proxies     []C.Proxy
+	proxies     []constant.Proxy
 	healthCheck *HealthCheck
 }
 
@@ -75,11 +75,11 @@ func (pp *proxySetProvider) Initial() error {
 	return nil
 }
 
-func (pp *proxySetProvider) Type() types.ProviderType {
-	return types.Proxy
+func (pp *proxySetProvider) Type() provider.Type {
+	return provider.Proxy
 }
 
-func (pp *proxySetProvider) Proxies() []C.Proxy {
+func (pp *proxySetProvider) Proxies() []constant.Proxy {
 	return pp.proxies
 }
 
@@ -87,7 +87,7 @@ func (pp *proxySetProvider) Touch() {
 	pp.healthCheck.touch()
 }
 
-func (pp *proxySetProvider) setProxies(proxies []C.Proxy) {
+func (pp *proxySetProvider) setProxies(proxies []constant.Proxy) {
 	pp.proxies = proxies
 	pp.healthCheck.setProxy(proxies)
 	if pp.healthCheck.auto() {
@@ -100,8 +100,8 @@ func stopProxyProvider(pd *ProxySetProvider) {
 	pd.fetcher.Destroy()
 }
 
-func NewProxySetProvider(name string, interval time.Duration, filter string, vehicle types.Vehicle, hc *HealthCheck) (*ProxySetProvider, error) {
-	filterReg, err := regexp.Compile(filter, regexp.None)
+func NewProxySetProvider(name string, interval time.Duration, filter string, vehicle provider.Vehicle, hc *HealthCheck) (*ProxySetProvider, error) {
+	filterReg, err := regexp2.Compile(filter, regexp2.None)
 	if err != nil {
 		return nil, fmt.Errorf("invalid filter regex: %w", err)
 	}
@@ -111,12 +111,12 @@ func NewProxySetProvider(name string, interval time.Duration, filter string, veh
 	}
 
 	pd := &proxySetProvider{
-		proxies:     []C.Proxy{},
+		proxies:     []constant.Proxy{},
 		healthCheck: hc,
 	}
 
 	onUpdate := func(elm any) {
-		ret := elm.([]C.Proxy)
+		ret := elm.([]constant.Proxy)
 		pd.setProxies(ret)
 	}
 
@@ -131,7 +131,7 @@ func NewProxySetProvider(name string, interval time.Duration, filter string, veh
 			return nil, errors.New("file must have a `proxies` field")
 		}
 
-		proxies := []C.Proxy{}
+		proxies := []constant.Proxy{}
 		for idx, mapping := range schema.Proxies {
 			if name, ok := mapping["name"].(string); ok && len(filter) > 0 {
 				matched, err := filterReg.MatchString(name)
@@ -175,7 +175,7 @@ type CompatibleProvider struct {
 type compatibleProvider struct {
 	name        string
 	healthCheck *HealthCheck
-	proxies     []C.Proxy
+	proxies     []constant.Proxy
 }
 
 func (cp *compatibleProvider) MarshalJSON() ([]byte, error) {
@@ -203,15 +203,15 @@ func (cp *compatibleProvider) Initial() error {
 	return nil
 }
 
-func (cp *compatibleProvider) VehicleType() types.VehicleType {
-	return types.Compatible
+func (cp *compatibleProvider) VehicleType() provider.VehicleType {
+	return provider.Compatible
 }
 
-func (cp *compatibleProvider) Type() types.ProviderType {
-	return types.Proxy
+func (cp *compatibleProvider) Type() provider.Type {
+	return provider.Proxy
 }
 
-func (cp *compatibleProvider) Proxies() []C.Proxy {
+func (cp *compatibleProvider) Proxies() []constant.Proxy {
 	return cp.proxies
 }
 
@@ -223,7 +223,7 @@ func stopCompatibleProvider(pd *CompatibleProvider) {
 	pd.healthCheck.close()
 }
 
-func NewCompatibleProvider(name string, proxies []C.Proxy, hc *HealthCheck) (*CompatibleProvider, error) {
+func NewCompatibleProvider(name string, proxies []constant.Proxy, hc *HealthCheck) (*CompatibleProvider, error) {
 	if len(proxies) == 0 {
 		return nil, errors.New("provider need one proxy at least")
 	}
@@ -243,12 +243,12 @@ func NewCompatibleProvider(name string, proxies []C.Proxy, hc *HealthCheck) (*Co
 	return wrapper, nil
 }
 
-var _ types.ProxyProvider = (*FilterableProvider)(nil)
+var _ provider.ProxyProvider = (*FilterableProvider)(nil)
 
 type FilterableProvider struct {
 	name      string
-	providers []types.ProxyProvider
-	filterReg *regexp.Regexp
+	providers []provider.ProxyProvider
+	filterReg *regexp2.Regexp
 	single    *singledo.Single
 }
 
@@ -276,22 +276,22 @@ func (fp *FilterableProvider) Initial() error {
 	return nil
 }
 
-func (fp *FilterableProvider) VehicleType() types.VehicleType {
-	return types.Compatible
+func (fp *FilterableProvider) VehicleType() provider.VehicleType {
+	return provider.Compatible
 }
 
-func (fp *FilterableProvider) Type() types.ProviderType {
-	return types.Proxy
+func (fp *FilterableProvider) Type() provider.Type {
+	return provider.Proxy
 }
 
-func (fp *FilterableProvider) Proxies() []C.Proxy {
-	elm, _, _ := fp.single.Do(func() (any, error) {
+func (fp *FilterableProvider) Proxies() []constant.Proxy {
+	_, elm, _ := fp.single.Do(func() (any, error) {
 		proxies := lo.FlatMap(
 			fp.providers,
-			func(item types.ProxyProvider, _ int) []C.Proxy {
+			func(item provider.ProxyProvider, _ int) []constant.Proxy {
 				return lo.Filter(
 					item.Proxies(),
-					func(item C.Proxy, _ int) bool {
+					func(item constant.Proxy, _ int) bool {
 						matched, _ := fp.filterReg.MatchString(item.Name())
 						return matched
 					})
@@ -303,7 +303,7 @@ func (fp *FilterableProvider) Proxies() []C.Proxy {
 		return proxies, nil
 	})
 
-	return elm.([]C.Proxy)
+	return elm.([]constant.Proxy)
 }
 
 func (fp *FilterableProvider) Touch() {
@@ -312,7 +312,7 @@ func (fp *FilterableProvider) Touch() {
 	}
 }
 
-func NewFilterableProvider(name string, providers []types.ProxyProvider, filterReg *regexp.Regexp) *FilterableProvider {
+func NewFilterableProvider(name string, providers []provider.ProxyProvider, filterReg *regexp2.Regexp) *FilterableProvider {
 	return &FilterableProvider{
 		name:      name,
 		providers: providers,

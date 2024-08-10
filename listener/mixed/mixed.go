@@ -4,8 +4,8 @@ import (
 	"net"
 
 	"github.com/lijinglin3/clash/common/cache"
-	N "github.com/lijinglin3/clash/common/net"
-	C "github.com/lijinglin3/clash/constant"
+	cnet "github.com/lijinglin3/clash/common/net"
+	"github.com/lijinglin3/clash/constant"
 	"github.com/lijinglin3/clash/listener/http"
 	"github.com/lijinglin3/clash/listener/socks"
 	"github.com/lijinglin3/clash/transport/socks4"
@@ -19,23 +19,23 @@ type Listener struct {
 	closed   bool
 }
 
-// RawAddress implements C.Listener
+// RawAddress implements constant.Listener
 func (l *Listener) RawAddress() string {
 	return l.addr
 }
 
-// Address implements C.Listener
+// Address implements constant.Listener
 func (l *Listener) Address() string {
 	return l.listener.Addr().String()
 }
 
-// Close implements C.Listener
+// Close implements constant.Listener
 func (l *Listener) Close() error {
 	l.closed = true
 	return l.listener.Close()
 }
 
-func New(addr string, in chan<- C.ConnContext) (C.Listener, error) {
+func New(addr string, in chan<- constant.ConnContext) (constant.Listener, error) {
 	l, err := net.Listen("tcp", addr)
 	if err != nil {
 		return nil, err
@@ -62,10 +62,10 @@ func New(addr string, in chan<- C.ConnContext) (C.Listener, error) {
 	return ml, nil
 }
 
-func handleConn(conn net.Conn, in chan<- C.ConnContext, cache *cache.LruCache) {
+func handleConn(conn net.Conn, in chan<- constant.ConnContext, lru *cache.LruCache) {
 	conn.(*net.TCPConn).SetKeepAlive(true)
 
-	bufConn := N.NewBufferedConn(conn)
+	bufConn := cnet.NewBufferedConn(conn)
 	head, err := bufConn.Peek(1)
 	if err != nil {
 		return
@@ -77,6 +77,6 @@ func handleConn(conn net.Conn, in chan<- C.ConnContext, cache *cache.LruCache) {
 	case socks5.Version:
 		socks.HandleSocks5(bufConn, in)
 	default:
-		http.HandleConn(bufConn, in, cache)
+		http.HandleConn(bufConn, in, lru)
 	}
 }

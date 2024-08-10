@@ -5,7 +5,7 @@ import (
 	"crypto/hmac"
 	"crypto/rand"
 	"encoding/binary"
-	mathRand "math/rand"
+	mathrand "math/rand"
 	"net"
 	"strings"
 	"time"
@@ -91,7 +91,7 @@ func (c *tls12TicketConn) Write(b []byte) (int, error) {
 		buf := pool.GetBuffer()
 		defer pool.PutBuffer(buf)
 		for len(b) > 2048 {
-			size := mathRand.Intn(4096) + 100
+			size := mathrand.Intn(4096) + 100
 			if len(b) < size {
 				size = len(b)
 			}
@@ -187,17 +187,17 @@ func (t *tls12Ticket) packAuthData(buf *bytes.Buffer) {
 }
 
 func packSNIData(buf *bytes.Buffer, u string) {
-	len := uint16(len(u))
+	length := uint16(len(u))
 	buf.Write([]byte{0, 0})
-	binary.Write(buf, binary.BigEndian, len+5)
-	binary.Write(buf, binary.BigEndian, len+3)
+	binary.Write(buf, binary.BigEndian, length+5)
+	binary.Write(buf, binary.BigEndian, length+3)
 	buf.WriteByte(0)
-	binary.Write(buf, binary.BigEndian, len)
+	binary.Write(buf, binary.BigEndian, length)
 	buf.WriteString(u)
 }
 
 func (c *tls12TicketConn) packTicketBuf(buf *bytes.Buffer, u string) {
-	length := 16 * (mathRand.Intn(17) + 8)
+	length := 16 * (mathrand.Intn(17) + 8)
 	buf.Write([]byte{0, 0x23})
 	binary.Write(buf, binary.BigEndian, uint16(length))
 	tools.AppendRandBytes(buf, length)
@@ -222,6 +222,6 @@ func (t *tls12Ticket) getHost() string {
 		host = ""
 	}
 	hosts := strings.Split(host, ",")
-	host = hosts[mathRand.Intn(len(hosts))]
+	host = hosts[mathrand.Intn(len(hosts))]
 	return host
 }

@@ -13,7 +13,7 @@ import (
 	"github.com/lijinglin3/clash/component/dialer"
 	"github.com/lijinglin3/clash/component/resolver"
 
-	D "github.com/miekg/dns"
+	"github.com/miekg/dns"
 )
 
 const (
@@ -26,11 +26,11 @@ type dohClient struct {
 	transport *http.Transport
 }
 
-func (dc *dohClient) Exchange(m *D.Msg) (msg *D.Msg, err error) {
+func (dc *dohClient) Exchange(m *dns.Msg) (msg *dns.Msg, err error) {
 	return dc.ExchangeContext(context.Background(), m)
 }
 
-func (dc *dohClient) ExchangeContext(ctx context.Context, m *D.Msg) (msg *D.Msg, err error) {
+func (dc *dohClient) ExchangeContext(ctx context.Context, m *dns.Msg) (msg *dns.Msg, err error) {
 	// https://datatracker.ietf.org/doc/html/rfc8484#section-4.1
 	// In order to maximize cache friendliness, SHOULD use a DNS ID of 0 in every DNS request.
 	newM := *m
@@ -49,7 +49,7 @@ func (dc *dohClient) ExchangeContext(ctx context.Context, m *D.Msg) (msg *D.Msg,
 }
 
 // newRequest returns a new DoH request given a dns.Msg.
-func (dc *dohClient) newRequest(m *D.Msg) (*http.Request, error) {
+func (dc *dohClient) newRequest(m *dns.Msg) (*http.Request, error) {
 	buf, err := m.Pack()
 	if err != nil {
 		return nil, err
@@ -65,7 +65,7 @@ func (dc *dohClient) newRequest(m *D.Msg) (*http.Request, error) {
 	return req, nil
 }
 
-func (dc *dohClient) doRequest(req *http.Request) (msg *D.Msg, err error) {
+func (dc *dohClient) doRequest(req *http.Request) (msg *dns.Msg, err error) {
 	client := &http.Client{Transport: dc.transport}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -77,7 +77,7 @@ func (dc *dohClient) doRequest(req *http.Request) (msg *D.Msg, err error) {
 	if err != nil {
 		return nil, err
 	}
-	msg = &D.Msg{}
+	msg = &dns.Msg{}
 	err = msg.Unpack(buf)
 	return msg, err
 }

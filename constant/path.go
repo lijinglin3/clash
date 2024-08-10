@@ -2,7 +2,7 @@ package constant
 
 import (
 	"os"
-	P "path"
+	"path"
 	"path/filepath"
 	"strings"
 )
@@ -13,23 +13,23 @@ const Name = "clash"
 //
 // on Unix systems, `$HOME/.config/clash`.
 // on Windows, `%USERPROFILE%/.config/clash`.
-var Path = func() *path {
+var Path = func() *iPath {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		homeDir, _ = os.Getwd()
 	}
 
-	homeDir = P.Join(homeDir, ".config", Name)
+	homeDir = path.Join(homeDir, ".config", Name)
 
 	if _, err = os.Stat(homeDir); err != nil {
 		if configHome, ok := os.LookupEnv("XDG_CONFIG_HOME"); ok {
-			homeDir = P.Join(configHome, Name)
+			homeDir = path.Join(configHome, Name)
 		}
 	}
-	return &path{homeDir: homeDir, configFile: "config.yaml"}
+	return &iPath{homeDir: homeDir, configFile: "config.yaml"}
 }()
 
-type path struct {
+type iPath struct {
 	homeDir    string
 	configFile string
 }
@@ -44,16 +44,16 @@ func SetConfig(file string) {
 	Path.configFile = file
 }
 
-func (p *path) HomeDir() string {
+func (p *iPath) HomeDir() string {
 	return p.homeDir
 }
 
-func (p *path) Config() string {
+func (p *iPath) Config() string {
 	return p.configFile
 }
 
 // Resolve return a absolute path or a relative path with homedir
-func (p *path) Resolve(path string) string {
+func (p *iPath) Resolve(path string) string {
 	if !filepath.IsAbs(path) {
 		return filepath.Join(p.HomeDir(), path)
 	}
@@ -62,7 +62,7 @@ func (p *path) Resolve(path string) string {
 }
 
 // IsSubPath return true if path is a subpath of homedir
-func (p *path) IsSubPath(path string) bool {
+func (p *iPath) IsSubPath(path string) bool {
 	homedir := p.HomeDir()
 	path = p.Resolve(path)
 	rel, err := filepath.Rel(homedir, path)
@@ -73,14 +73,14 @@ func (p *path) IsSubPath(path string) bool {
 	return !strings.Contains(rel, "..")
 }
 
-func (p *path) MMDB() string {
-	return P.Join(p.homeDir, "Country.mmdb")
+func (p *iPath) MMDB() string {
+	return path.Join(p.homeDir, "Country.mmdb")
 }
 
-func (p *path) OldCache() string {
-	return P.Join(p.homeDir, ".cache")
+func (p *iPath) OldCache() string {
+	return path.Join(p.homeDir, ".cache")
 }
 
-func (p *path) Cache() string {
-	return P.Join(p.homeDir, "cache.db")
+func (p *iPath) Cache() string {
+	return path.Join(p.homeDir, "cache.db")
 }

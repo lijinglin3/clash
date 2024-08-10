@@ -3,18 +3,18 @@ package context
 import (
 	"net"
 
-	C "github.com/lijinglin3/clash/constant"
+	"github.com/lijinglin3/clash/constant"
 
 	"github.com/gofrs/uuid/v5"
 )
 
 type ConnContext struct {
 	id       uuid.UUID
-	metadata *C.Metadata
+	metadata *constant.Metadata
 	conn     net.Conn
 }
 
-func NewConnContext(conn net.Conn, metadata *C.Metadata) *ConnContext {
+func NewConnContext(conn net.Conn, metadata *constant.Metadata) *ConnContext {
 	id, _ := uuid.NewV4()
 	return &ConnContext{
 		id:       id,
@@ -23,17 +23,17 @@ func NewConnContext(conn net.Conn, metadata *C.Metadata) *ConnContext {
 	}
 }
 
-// ID implement C.ConnContext ID
+// ID implement constant.ConnContext ID
 func (c *ConnContext) ID() uuid.UUID {
 	return c.id
 }
 
-// Metadata implement C.ConnContext Metadata
-func (c *ConnContext) Metadata() *C.Metadata {
+// Metadata implement constant.ConnContext Metadata
+func (c *ConnContext) Metadata() *constant.Metadata {
 	return c.metadata
 }
 
-// Conn implement C.ConnContext Conn
+// Conn implement constant.ConnContext Conn
 func (c *ConnContext) Conn() net.Conn {
 	return c.conn
 }
